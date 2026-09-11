@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JOCKY — Digital Forensics Command & Control</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="brand-icon">J</div>
+      <span class="brand-title">JOCKY COMMAND CENTER</span>
+      <span class="brand-badge">NTRO-26148</span>
+    </div>
+    <div class="header-status">
+      <div class="status-indicator">
+        <span class="pulse-dot"></span>
+        <span style="color: var(--text-secondary);">DEFCON 4 • ACTIVE SURVEILLANCE</span>
+      </div>
+      <div style="font-family: var(--font-mono); color: var(--text-muted);" id="live-clock">
+        00:00:00 UTC
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Top Stats Row -->
+    <div class="card full-width">
+      <div class="stats-grid">
+        <div class="stat-box">
+          <div class="stat-label">Active Warrants (Sec 69)</div>
+          <div class="stat-value" id="stat-warrants">2</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Connected Agents</div>
+          <div class="stat-value" id="stat-agents">3</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Active Sessions</div>
+          <div class="stat-value" id="stat-sessions">1</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Audit Ledger Blocks</div>
+          <div class="stat-value" id="stat-blocks">4</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Forensic DSL Compiler & Session Dispatcher -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">⚡ Forensic DSL Compiler & Session Dispatch</div>
+        <span class="brand-badge">LLVM 18.1 Polymorphic IR</span>
+      </div>
+      <div class="dsl-editor">
+        <label style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">JOCKY DSL SCRIPT (.jocky)</label>
+        <textarea id="dsl-input">forensic session {
+    target: "10.0.5.42";
+    warrant: "NTRO-2026-LINUX-0089";
+    collect {
+        proc: all_processes,
+        auditd: execve | connect,
+        network: active_connections
+    };
+    encrypt chacha20(key: hsm_derived);
+    transmit via: "wss://forensics.ntro.gov.in/telemetry";
+}</textarea>
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <select id="target-os-select" style="background: #0d121d; color: var(--text-primary); border: 1px solid var(--border-subtle); padding: 8px 12px; border-radius: 6px; font-size: 0.85rem;">
+            <option value="linux">Target: Linux (eBPF/procfs)</option>
+            <option value="windows">Target: Windows (WDK/ETW/Registry)</option>
+          </select>
+          <button class="btn" id="btn-compile">Compile to LLVM IR</button>
+          <button class="btn btn-secondary" id="btn-dispatch">Dispatch Task</button>
+        </div>
+        <div id="compile-status" style="font-size: 0.8rem; min-height: 20px;"></div>
+      </div>
+    </div>
+
+    <!-- LLVM IR Output Preview -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">🔬 Emitted LLVM Intermediate Representation</div>
+        <span class="brand-badge" id="ir-target-badge">x86_64-linux-gnu</span>
+      </div>
+      <div class="ir-output" id="ir-display">; Compile a script to inspect generated LLVM IR text with runtime linkage declarations...</div>
+    </div>
+
+    <!-- Active Agents Fleet -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">🛰️ Field Agent Fleet</div>
+        <button class="btn btn-secondary" style="font-size: 0.75rem; padding: 4px 10px;" id="btn-refresh-agents">Refresh</button>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Agent ID</th>
+            <th>Hostname</th>
+            <th>Platform</th>
+            <th>IP Address</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="agents-tbody">
+          <tr>
+            <td style="font-family: var(--font-mono);">agent-lx-01</td>
+            <td>prod-gateway-01</td>
+            <td><span class="tag tag-linux">Linux 6.5</span></td>
+            <td>10.0.5.42</td>
+            <td><span class="tag tag-active">ONLINE</span></td>
+          </tr>
+          <tr>
+            <td style="font-family: var(--font-mono);">agent-win-02</td>
+            <td>corp-dc-primary</td>
+            <td><span class="tag tag-windows">Win 11 23H2</span></td>
+            <td>192.168.1.10</td>
+            <td><span class="tag tag-active">ONLINE</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Cryptographic Audit Ledger -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">🔒 Tamper-Proof Audit Ledger (IT Act Sec 69)</div>
+        <span class="brand-badge">SHA-256 Hash Chain</span>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Block</th>
+            <th>Event</th>
+            <th>Warrant ID</th>
+            <th>Officer</th>
+            <th>Block Hash</th>
+          </tr>
+        </thead>
+        <tbody id="ledger-tbody">
+          <tr>
+            <td>#0</td>
+            <td><span class="tag tag-active">GENESIS</span></td>
+            <td>GENESIS</td>
+            <td>SYSTEM</td>
+            <td><span class="block-hash">e3b0c44298fc...</span></td>
+          </tr>
+          <tr>
+            <td>#1</td>
+            <td><span class="tag tag-linux">SESSION_CREATED</span></td>
+            <td>NTRO-2026-LINUX-0089</td>
+            <td>OFFICER-VK-902</td>
+            <td><span class="block-hash">7c8d92a11b0e...</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

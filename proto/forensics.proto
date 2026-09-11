@@ -1,0 +1,99 @@
+syntax = "proto3";
+
+package jocky.forensics.v1;
+
+option go_package = "github.com/jocky-sec/jocky/server/proto/v1;forensicsv1";
+
+enum OperatingSystem {
+  OS_UNSPECIFIED = 0;
+  OS_LINUX = 1;
+  OS_WINDOWS = 2;
+}
+
+enum EncryptionAlgorithm {
+  ENCRYPTION_UNSPECIFIED = 0;
+  ENCRYPTION_AES256_GCM = 1;
+  ENCRYPTION_CHACHA20_POLY1305 = 2;
+  ENCRYPTION_ML_KEM_768 = 3;
+}
+
+enum ArtifactType {
+  ARTIFACT_UNSPECIFIED = 0;
+  ARTIFACT_REGISTRY = 1;
+  ARTIFACT_MEMORY = 2;
+  ARTIFACT_NETWORK = 3;
+  ARTIFACT_DISK_MFT = 4;
+  ARTIFACT_PROC = 5;
+  ARTIFACT_AUDITD = 6;
+  ARTIFACT_EXT4 = 7;
+}
+
+enum SessionState {
+  STATE_UNSPECIFIED = 0;
+  STATE_PENDING = 1;
+  STATE_ACTIVE = 2;
+  STATE_COMPLETED = 3;
+  STATE_FAILED = 4;
+  STATE_REVOKED = 5;
+}
+
+message AgentRegistration {
+  string agent_id = 1;
+  string hostname = 2;
+  string ip_address = 3;
+  OperatingSystem os = 4;
+  string kernel_version = 5;
+  bytes public_key = 6;
+  int64 registered_at = 7;
+}
+
+message WarrantAuthorization {
+  string warrant_id = 1;
+  string authorizing_officer_1 = 2;
+  string authorizing_officer_2 = 3;
+  int64 valid_from = 4;
+  int64 valid_until = 5;
+  string jurisdiction = 6;
+  bytes signature = 7;
+}
+
+message ForensicTask {
+  string task_id = 1;
+  string session_id = 2;
+  WarrantAuthorization warrant = 3;
+  string target = 4;
+  repeated ArtifactType artifacts = 5;
+  EncryptionAlgorithm encryption = 6;
+  string key_source = 7;
+  bytes compiled_ir_payload = 8;
+  int64 issued_at = 9;
+}
+
+message EvidenceChunk {
+  string session_id = 1;
+  string task_id = 2;
+  ArtifactType artifact_type = 3;
+  uint32 chunk_index = 4;
+  uint32 total_chunks = 5;
+  bytes encrypted_data = 6;
+  bytes sha256_checksum = 7;
+  int64 collected_at = 8;
+}
+
+message Heartbeat {
+  string agent_id = 1;
+  int64 timestamp = 2;
+  double cpu_usage_pct = 3;
+  double memory_usage_mb = 4;
+  uint32 active_tasks_count = 5;
+  SessionState current_status = 6;
+}
+
+message CommandMessage {
+  oneof payload {
+    AgentRegistration register = 1;
+    Heartbeat heartbeat = 2;
+    ForensicTask task = 3;
+    EvidenceChunk evidence = 4;
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "name": "jocky-web-dashboard",
+  "version": "1.0.0",
+  "description": "JOCKY Enterprise Digital Forensics Command Console",
+  "main": "index.html",
+  "scripts": {
+    "dev": "npx -y serve . -p 3000",
+    "start": "npx -y serve . -p 3000"
+  },
+  "keywords": ["forensics", "dfir", "edr", "ntro"],
+  "author": "NTRO Forensic Division",
+  "license": "UNLICENSED"
+}

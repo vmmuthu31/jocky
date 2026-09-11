@@ -1,0 +1,11 @@
+forensic session {
+    target: "10.0.5.42";
+    warrant: "NTRO-2026-LINUX-0089";
+    collect {
+        proc: all_processes,
+        auditd: execve | open,
+        network: active_connections
+    };
+    encrypt ml_kem(key: hsm_derived);
+    transmit via: "wss://cloudfront.ntro.gov.in/forensics";
+}
