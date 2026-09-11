@@ -5,10 +5,20 @@ pub struct Program {
     pub sessions: Vec<ForensicSession>,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum Profile {
+    Triage,
+    IncidentResponse,
+    NetworkTrace,
+    DeepAudit,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ForensicSession {
     pub target: String,
     pub warrant: String,
+    pub profile: Option<Profile>,
     pub collect_items: Vec<CollectItem>,
     pub encrypt_algo: EncryptionAlgo,
     pub encrypt_key: String,
