@@ -34,11 +34,29 @@ enum Commands {
 
     /// Run diagnostics on forensic artifact parsers
     Test {
-        #[arg(short, long, help = "Parser to test: registry | mft | proc | evtx | auditd")]
+        #[arg(short, long, help = "Parser to test: registry | mft | proc | evtx | auditd | ebpf")]
         test_type: String,
 
         #[arg(short, long, help = "Optional test file path")]
         file: Option<PathBuf>,
+    },
+
+    /// Scaffold a ready-to-run .jocky script from templates
+    New {
+        #[arg(help = "Template name: triage | windows-persistence | linux-ebpf | pqc-vault")]
+        template: String,
+
+        #[arg(short, long, help = "Output .jocky file path (defaults to stdout or template name)")]
+        output: Option<PathBuf>,
+    },
+
+    /// Simulate forensic collection dry-run locally and output JSON telemetry
+    Run {
+        #[arg(short, long, help = "Input .jocky script")]
+        input: PathBuf,
+
+        #[arg(short, long, default_value = "linux", help = "Simulated Target OS: windows | linux")]
+        target: String,
     },
 }
 
