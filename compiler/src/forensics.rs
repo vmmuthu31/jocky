@@ -62,3 +62,5 @@ pub use windows::mft::MFTParser;
 pub use windows::eventlog::EventLogParser;
 pub use linux::proc_fs::ProcParser;
 pub use linux::auditd::AuditdParser;
+pub use linux::ebpf::{EbpfProbeManager, EbpfTelemetryBatch, EbpfProcessExecEvent, EbpfFileOpenEvent, EbpfSocketEvent};
+
