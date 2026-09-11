@@ -96,3 +96,28 @@ fn test_illegal_cross_compilation_fails_validation() {
     let error_message = result.unwrap_err().to_string();
     assert!(error_message.contains("only compatible with Windows targets"));
 }
+
+#[test]
+fn test_minimal_dsl_with_profile() {
+    let dsl = r#"
+    forensic session {
+        target: "10.0.5.42";
+        warrant: "NTRO-2026-LINUX-0089";
+        profile: triage;
+    }
+    "#;
+
+    let program = Parser::parse(dsl).expect("Parsing minimal DSL session should succeed");
+    assert_eq!(program.sessions.len(), 1);
+    let session = &program.sessions[0];
+    assert_eq!(session.target, "10.0.5.42");
+    assert_eq!(session.warrant, "NTRO-2026-LINUX-0089");
+    assert_eq!(session.profile, Some(jocky_compiler::ast::Profile::Triage));
+    assert!(!session.collect_items.is_empty(), "Profile should auto-populate collect items");
+    assert_eq!(session.encrypt_key, "hsm_derived");
+    assert_eq!(session.transmit_endpoint, "wss://telemetry.jocky.internal/forensics");
+
+    Validator::validate_program(&program, Some(TargetOS::Linux))
+        .expect("Validation for minimal session should pass");
+}
+

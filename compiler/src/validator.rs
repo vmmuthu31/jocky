@@ -151,6 +151,7 @@ mod tests {
         ForensicSession {
             target: "10.0.0.1".to_string(),
             warrant: "NTRO-2026-CYBER-0042".to_string(),
+            profile: None,
             collect_items: vec![CollectItem {
                 artifact_type: if target_os_linux {
                     ArtifactType::Proc

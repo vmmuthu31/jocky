@@ -26,6 +26,28 @@ impl<'a> InnerParser<'a> {
         Self { src, pos: 0 }
     }
 
+    fn line_col(&self) -> (usize, usize) {
+        let mut line = 1;
+        let mut col = 1;
+        for (i, b) in self.src.bytes().enumerate() {
+            if i >= self.pos {
+                break;
+            }
+            if b == b'\n' {
+                line += 1;
+                col = 1;
+            } else {
+                col += 1;
+            }
+        }
+        (line, col)
+    }
+
+    fn error(&self, msg: &str) -> anyhow::Error {
+        let (line, col) = self.line_col();
+        anyhow::anyhow!("[Line {}, Col {}]: {}", line, col, msg)
+    }
+
     fn parse_program(&mut self) -> Result<Program> {
         let mut sessions = Vec::new();
         self.skip_ws_comments();
@@ -34,7 +56,7 @@ impl<'a> InnerParser<'a> {
             self.skip_ws_comments();
         }
         if sessions.is_empty() {
-            return Err(anyhow!("No forensic sessions found in source"));
+            return Err(self.error("No forensic sessions found in source"));
         }
         Ok(Program { sessions })
     }
@@ -47,40 +69,144 @@ impl<'a> InnerParser<'a> {
         self.expect_char('{')?;
         self.skip_ws_comments();
 
-        let target = self.parse_field("target")?;
-        self.skip_ws_comments();
+        let mut target = String::new();
+        let mut warrant = String::new();
+        let mut profile: Option<Profile> = None;
+        let mut collect_items = Vec::new();
+        let mut encrypt_algo = EncryptionAlgo::Aes256;
+        let mut encrypt_key = "hsm_derived".to_string();
+        let mut has_encrypt = false;
+        let mut transmit_endpoint = "wss://telemetry.jocky.internal/forensics".to_string();
 
-        // warrant is required
-        if !self.peek_keyword("warrant") {
-            return Err(anyhow!("Missing required 'warrant' field in forensic session"));
+        while !self.peek_char('}') && self.pos < self.src.len() {
+            if self.peek_keyword("target") {
+                target = self.parse_field("target")?;
+            } else if self.peek_keyword("warrant") {
+                warrant = self.parse_field("warrant")?;
+            } else if self.peek_keyword("profile") {
+                profile = Some(self.parse_profile()?);
+            } else if self.peek_keyword("collect") {
+                collect_items = self.parse_collect_block()?;
+                self.skip_ws_comments();
+                if self.peek_char(';') {
+                    self.pos += 1;
+                }
+            } else if self.peek_keyword("encrypt") {
+                let (algo, key) = self.parse_encrypt()?;
+                encrypt_algo = algo;
+                encrypt_key = key;
+                has_encrypt = true;
+            } else if self.peek_keyword("transmit") {
+                transmit_endpoint = self.parse_transmit()?;
+            } else {
+                return Err(self.error("Unexpected statement inside forensic session. Expected target, warrant, profile, collect, encrypt, or transmit"));
+            }
+            self.skip_ws_comments();
         }
-        let warrant = self.parse_field("warrant")?;
-        self.skip_ws_comments();
-
-        let collect_items = self.parse_collect_block()?;
-        self.skip_ws_comments();
-        // DSL allows optional `;` after the collect `}` block
-        if self.peek_char(';') {
-            self.pos += 1;
-        }
-        self.skip_ws_comments();
-
-        let (encrypt_algo, encrypt_key) = self.parse_encrypt()?;
-        self.skip_ws_comments();
-
-        let transmit_endpoint = self.parse_transmit()?;
-        self.skip_ws_comments();
 
         self.expect_char('}')?;
+
+        if target.is_empty() {
+            return Err(self.error("Missing required 'target' field in forensic session"));
+        }
+        if warrant.is_empty() {
+            return Err(self.error("Missing required 'warrant' field in forensic session"));
+        }
+
+        if collect_items.is_empty() {
+            if let Some(ref prof) = profile {
+                collect_items = Self::expand_profile_defaults(prof);
+            }
+        }
+
+        if !has_encrypt && profile.is_some() {
+            encrypt_algo = EncryptionAlgo::Aes256;
+            encrypt_key = "hsm_derived".to_string();
+        }
 
         Ok(ForensicSession {
             target,
             warrant,
+            profile,
             collect_items,
             encrypt_algo,
             encrypt_key,
             transmit_endpoint,
         })
+    }
+
+    fn parse_profile(&mut self) -> Result<Profile> {
+        self.expect_keyword("profile")?;
+        self.skip_ws_comments();
+        self.expect_char(':')?;
+        self.skip_ws_comments();
+        let prof_name = self.read_identifier()?;
+        self.skip_ws_comments();
+        self.expect_char(';')?;
+
+        match prof_name.as_str() {
+            "triage" => Ok(Profile::Triage),
+            "incident_response" => Ok(Profile::IncidentResponse),
+            "network_trace" => Ok(Profile::NetworkTrace),
+            "deep_audit" => Ok(Profile::DeepAudit),
+            other => Err(self.error(&format!("Unknown profile '{}'. Available: triage, incident_response, network_trace, deep_audit", other))),
+        }
+    }
+
+    fn expand_profile_defaults(profile: &Profile) -> Vec<CollectItem> {
+        match profile {
+            Profile::Triage => vec![
+                CollectItem {
+                    artifact_type: ArtifactType::Proc,
+                    expression: Expression::Identifier("all_processes".to_string()),
+                },
+                CollectItem {
+                    artifact_type: ArtifactType::Network,
+                    expression: Expression::Identifier("active_connections".to_string()),
+                },
+            ],
+            Profile::IncidentResponse => vec![
+                CollectItem {
+                    artifact_type: ArtifactType::Proc,
+                    expression: Expression::Identifier("all_processes".to_string()),
+                },
+                CollectItem {
+                    artifact_type: ArtifactType::Auditd,
+                    expression: Expression::PipeExpr {
+                        left: Box::new(Expression::Identifier("execve".to_string())),
+                        right: Box::new(Expression::Identifier("connect".to_string())),
+                    },
+                },
+                CollectItem {
+                    artifact_type: ArtifactType::Network,
+                    expression: Expression::Identifier("active_connections".to_string()),
+                },
+            ],
+            Profile::NetworkTrace => vec![
+                CollectItem {
+                    artifact_type: ArtifactType::Network,
+                    expression: Expression::Identifier("active_connections".to_string()),
+                },
+            ],
+            Profile::DeepAudit => vec![
+                CollectItem {
+                    artifact_type: ArtifactType::Proc,
+                    expression: Expression::Identifier("all_processes".to_string()),
+                },
+                CollectItem {
+                    artifact_type: ArtifactType::Auditd,
+                    expression: Expression::Identifier("execve".to_string()),
+                },
+                CollectItem {
+                    artifact_type: ArtifactType::Ext4,
+                    expression: Expression::Identifier("journal_inspection".to_string()),
+                },
+                CollectItem {
+                    artifact_type: ArtifactType::Network,
+                    expression: Expression::Identifier("active_connections".to_string()),
+                },
+            ],
+        }
     }
 
     fn parse_field(&mut self, name: &str) -> Result<String> {
@@ -238,7 +364,7 @@ impl<'a> InnerParser<'a> {
         }
         let word = &self.src[start..self.pos];
         if word.is_empty() {
-            Err(anyhow!("Expected identifier at position {}", start))
+            Err(self.error(&format!("Expected identifier at offset {}", start)))
         } else {
             Ok(word.to_string())
         }
@@ -249,7 +375,7 @@ impl<'a> InnerParser<'a> {
             self.pos += kw.len();
             Ok(())
         } else {
-            Err(anyhow!("Expected keyword '{}' at pos {}", kw, self.pos))
+            Err(self.error(&format!("Expected keyword '{}'", kw)))
         }
     }
 
@@ -259,7 +385,7 @@ impl<'a> InnerParser<'a> {
             Ok(())
         } else {
             let got = self.src.get(self.pos..self.pos + 1).unwrap_or("EOF");
-            Err(anyhow!("Expected '{}' but got '{}' at pos {}", ch, got, self.pos))
+            Err(self.error(&format!("Expected '{}' but found '{}'", ch, got)))
         }
     }
 
