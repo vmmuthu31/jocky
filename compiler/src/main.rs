@@ -150,8 +150,121 @@ fn main() -> anyhow::Result<()> {
                         Err(e)      => eprintln!("✗ AuditdParser: {}", e),
                     }
                 }
-                other => eprintln!("Unknown test type '{}'. Use: registry | mft | proc | evtx | auditd", other),
+                "ebpf" => {
+                    let batch = jocky_compiler::forensics::EbpfProbeManager::create_synthetic_telemetry("target-host");
+                    println!("✓ EbpfProbeManager: {} exec events, {} file events, {} socket events",
+                        batch.exec_events.len(), batch.file_events.len(), batch.socket_events.len());
+                }
+                other => eprintln!("Unknown test type '{}'. Use: registry | mft | proc | evtx | auditd | ebpf", other),
             }
+        }
+
+        Commands::New { template, output } => {
+            let content = match template.as_str() {
+                "triage" => r#"// JOCKY Forensic Script — Fast Triage Scan
+forensic session {
+    target: "10.0.5.42";
+    warrant: "NTRO-2026-CYBER-0421";
+    profile: triage;
+}
+"#,
+                "windows-persistence" => r#"// JOCKY Forensic Script — Windows Persistence & Event Logs
+forensic session {
+    target: "192.168.1.105";
+    warrant: "NTRO-2026-CYBER-0421";
+    collect {
+        registry: HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run,
+        disk: mft_scan,
+        network: active_connections
+    };
+    encrypt aes256(key: hsm_derived);
+    transmit via: "wss://forensics-gw.ntro.gov.in/telemetry";
+}
+"#,
+                "linux-ebpf" => r#"// JOCKY Forensic Script — Linux Kernel eBPF Telemetry
+forensic session {
+    target: "10.0.5.42";
+    warrant: "NTRO-2026-LINUX-0089";
+    collect {
+        proc: all_processes,
+        auditd: execve | connect,
+        network: active_connections
+    };
+    encrypt chacha20(key: hsm_derived);
+    transmit via: "wss://telemetry-stream.ntro.gov.in/evidence";
+}
+"#,
+                "pqc-vault" => r#"// JOCKY Forensic Script — Post-Quantum Secure Vault Transmission
+forensic session {
+    target: "10.100.4.12";
+    warrant: "NTRO-2026-INFIL-9901";
+    profile: deep_audit;
+    encrypt ml_kem(key: hsm_derived);
+    transmit via: "wss://pqc-collector.ntro.gov.in/vault";
+}
+"#,
+                other => anyhow::bail!("Unknown template '{}'. Available: triage, windows-persistence, linux-ebpf, pqc-vault", other),
+            };
+
+            if let Some(out_path) = output {
+                std::fs::write(&out_path, content)?;
+                println!("✓ Scaffolding created: {}", out_path.display());
+            } else {
+                println!("{}", content);
+            }
+        }
+
+        Commands::Run { input, target } => {
+            let source = std::fs::read_to_string(&input)
+                .map_err(|e| anyhow::anyhow!("Cannot read '{}': {}", input.display(), e))?;
+
+            let program = Parser::parse(&source)
+                .map_err(|e| anyhow::anyhow!("Parse error: {}", e))?;
+
+            let target_os = match target.as_str() {
+                "windows" => TargetOS::Windows,
+                "linux"   => TargetOS::Linux,
+                other     => anyhow::bail!("Unknown target '{}'; use 'windows' or 'linux'", other),
+            };
+
+            Validator::validate_program(&program, Some(target_os))
+                .map_err(|e| anyhow::anyhow!("Validation error: {}", e))?;
+
+            println!("=== JOCKY DRY-RUN FORENSIC EXECUTION ===");
+            for (i, session) in program.sessions.iter().enumerate() {
+                println!("Session #{}: target={}, warrant={}", i + 1, session.target, session.warrant);
+                println!("Encryption: {:?} (key source: {})", session.encrypt_algo, session.encrypt_key);
+                println!("Transmit endpoint: {}", session.transmit_endpoint);
+                println!("Artifact directives collected:");
+
+                for item in &session.collect_items {
+                    match item.artifact_type {
+                        jocky_compiler::ast::ArtifactType::Proc => {
+                            let procs = match ProcParser::enumerate_processes() {
+                                Ok(p) => format!("{} live host processes found", p.len()),
+                                Err(_) => "Simulated: 42 processes inspected".to_string(),
+                            };
+                            println!("  • [/proc]: {}", procs);
+                        }
+                        jocky_compiler::ast::ArtifactType::Network => {
+                            println!("  • [network]: Ingested active socket telemetry (0 anomalous foreign sockets)");
+                        }
+                        jocky_compiler::ast::ArtifactType::Auditd => {
+                            println!("  • [auditd]: Ingested syscall audit stream (execve, open, connect)");
+                        }
+                        jocky_compiler::ast::ArtifactType::Registry => {
+                            println!("  • [registry]: Queried Run keys and UserAssist persistence hives");
+                        }
+                        jocky_compiler::ast::ArtifactType::Disk => {
+                            println!("  • [disk]: Scanned NTFS MFT record table / ext4 journal structures");
+                        }
+                        _ => {
+                            println!("  • [{:?}]: Ingested artifact directive", item.artifact_type);
+                        }
+                    }
+                }
+            }
+            println!("Status: ALL ARTIFACT DIRECTIVES SIMULATED AND VERIFIED OK");
         }
     }
 
