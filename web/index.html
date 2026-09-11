@@ -57,25 +57,32 @@
         <span class="brand-badge">LLVM 18.1 Polymorphic IR</span>
       </div>
       <div class="dsl-editor">
-        <label style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">JOCKY DSL SCRIPT (.jocky)</label>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+          <label style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">JOCKY DSL SCRIPT (.jocky)</label>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 0.75rem; color: var(--text-muted);">Quick Template:</span>
+            <select id="template-select" style="background: #0d121d; color: var(--accent-cyan); border: 1px solid var(--border-subtle); padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; cursor: pointer;">
+              <option value="custom">-- Custom DSL Script --</option>
+              <option value="triage">Triage Scan (Minimal Profile)</option>
+              <option value="windows-persistence">Windows Persistence & Run Keys</option>
+              <option value="linux-ebpf">Linux Kernel eBPF Probes</option>
+              <option value="pqc-vault">Post-Quantum Vault (ML-KEM)</option>
+            </select>
+          </div>
+        </div>
         <textarea id="dsl-input">forensic session {
     target: "10.0.5.42";
     warrant: "NTRO-2026-LINUX-0089";
-    collect {
-        proc: all_processes,
-        auditd: execve | connect,
-        network: active_connections
-    };
-    encrypt chacha20(key: hsm_derived);
-    transmit via: "wss://forensics.ntro.gov.in/telemetry";
+    profile: triage;
 }</textarea>
-        <div style="display: flex; gap: 10px; align-items: center;">
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
           <select id="target-os-select" style="background: #0d121d; color: var(--text-primary); border: 1px solid var(--border-subtle); padding: 8px 12px; border-radius: 6px; font-size: 0.85rem;">
             <option value="linux">Target: Linux (eBPF/procfs)</option>
             <option value="windows">Target: Windows (WDK/ETW/Registry)</option>
           </select>
           <button class="btn" id="btn-compile">Compile to LLVM IR</button>
-          <button class="btn btn-secondary" id="btn-dispatch">Dispatch Task</button>
+          <button class="btn btn-secondary" id="btn-dispatch">Dispatch Session</button>
+          <button class="btn btn-secondary" id="btn-simulate" style="border-color: var(--accent-cyan); color: var(--accent-cyan);">Simulate Local Run</button>
         </div>
         <div id="compile-status" style="font-size: 0.8rem; min-height: 20px;"></div>
       </div>
@@ -129,8 +136,12 @@
     <div class="card">
       <div class="card-header">
         <div class="card-title">🔒 Tamper-Proof Audit Ledger (IT Act Sec 69)</div>
-        <span class="brand-badge">SHA-256 Hash Chain</span>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <button class="btn" style="font-size: 0.75rem; padding: 4px 10px; background: rgba(16, 185, 129, 0.2); border: 1px solid var(--accent-emerald); color: var(--accent-emerald);" id="btn-verify-chain">Verify Chain Integrity (Sec 65B)</button>
+          <span class="brand-badge">SHA-256 Hash Chain</span>
+        </div>
       </div>
+      <div id="chain-verify-status" style="display: none; padding: 10px 14px; margin-bottom: 12px; border-radius: 6px; font-size: 0.8rem; background: rgba(16, 185, 129, 0.08); border: 1px solid var(--accent-emerald);"></div>
       <table>
         <thead>
           <tr>
