@@ -88,3 +88,58 @@ func TestCreateSessionAndAuditLedger(t *testing.T) {
 		t.Fatalf("Expected status 200 for ledger, got %d", wLedger.Code)
 	}
 }
+
+func TestTemplatesEndpoint(t *testing.T) {
+	warrantSvc := services.NewWarrantService()
+	sessionSvc := services.NewSessionService(warrantSvc, "")
+	router := SetupRouter(sessionSvc, warrantSvc)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/api/v1/templates", nil)
+	router.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("Expected status 200 for templates, got %d", w.Code)
+	}
+
+	var resp struct {
+		Templates map[string]string `json:"templates"`
+	}
+	if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
+		t.Fatalf("Failed to parse templates response: %v", err)
+	}
+
+	if len(resp.Templates) < 3 {
+		t.Fatalf("Expected at least 3 templates, got %d", len(resp.Templates))
+	}
+	if _, ok := resp.Templates["triage"]; !ok {
+		t.Fatalf("Expected triage template to exist")
+	}
+}
+
+func TestEvidenceVerificationAPI(t *testing.T) {
+	warrantSvc := services.NewWarrantService()
+	sessionSvc := services.NewSessionService(warrantSvc, "")
+	router := SetupRouter(sessionSvc, warrantSvc)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/api/v1/evidence/verify?session_id=ALL", nil)
+	router.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("Expected status 200 for evidence verify, got %d", w.Code)
+	}
+
+	var result models.EvidenceVerificationResult
+	if err := json.Unmarshal(w.Body.Bytes(), &result); err != nil {
+		t.Fatalf("Failed to parse evidence verification response: %v", err)
+	}
+
+	if !result.ChainIntact {
+		t.Fatalf("Expected genesis audit ledger chain to be intact")
+	}
+	if result.TotalBlocksChecked < 1 {
+		t.Fatalf("Expected at least 1 block checked (genesis)")
+	}
+}
+

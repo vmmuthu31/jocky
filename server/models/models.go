@@ -78,3 +78,15 @@ type AuditBlock struct {
 	BlockHash    string                 `json:"block_hash"`
 	Timestamp    time.Time              `json:"timestamp"`
 }
+
+type EvidenceVerificationResult struct {
+	SessionID         string    `json:"session_id"`
+	TotalBlocksChecked int      `json:"total_blocks_checked"`
+	ChainIntact        bool     `json:"chain_intact"`
+	GenesisHash        string    `json:"genesis_hash"`
+	LatestBlockHash    string    `json:"latest_block_hash"`
+	ComplianceStandard string    `json:"compliance_standard"`
+	VerifiedAt         time.Time `json:"verified_at"`
+	Details            string    `json:"details"`
+}
+

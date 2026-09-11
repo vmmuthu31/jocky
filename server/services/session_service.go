@@ -89,8 +89,24 @@ func (s *SessionService) CreateSession(warrantID, targetIP, agentID, dslSource, 
 }
 
 func (s *SessionService) compileDSL(dslSource, targetOS string) (string, error) {
-	if s.compilerPath == "" {
-		return "; Simulated IR bytecode", nil
+	compiler := s.compilerPath
+	if compiler == "" {
+		candidates := []string{
+			"../compiler/target/debug/jocky-compile",
+			"../compiler/target/release/jocky-compile",
+			"compiler/target/debug/jocky-compile",
+			"compiler/target/release/jocky-compile",
+		}
+		for _, c := range candidates {
+			if _, err := os.Stat(c); err == nil {
+				compiler = c
+				break
+			}
+		}
+	}
+
+	if compiler == "" {
+		return "; Simulated LLVM IR (Compiler binary not located)", nil
 	}
 
 	tmpDir, err := os.MkdirTemp("", "jocky_compile_*")
@@ -106,7 +122,7 @@ func (s *SessionService) compileDSL(dslSource, targetOS string) (string, error) 
 		return "", err
 	}
 
-	cmd := exec.Command(s.compilerPath, "compile", "--input", inputFile, "--output", outputFile, "--target", targetOS)
+	cmd := exec.Command(compiler, "compile", "--input", inputFile, "--output", outputFile, "--target", targetOS)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return "", fmt.Errorf("compiler error (%s): %s", err, string(output))
@@ -195,3 +211,101 @@ func (s *SessionService) appendAuditBlock(sessionID, warrantID, eventType, offic
 
 	s.auditLedger = append(s.auditLedger, block)
 }
+
+func (s *SessionService) VerifyEvidenceChain(sessionID string) (*models.EvidenceVerificationResult, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	if len(s.auditLedger) == 0 {
+		return nil, errors.New("audit ledger is uninitialized")
+	}
+
+	genesis := s.auditLedger[0]
+	latest := s.auditLedger[len(s.auditLedger)-1]
+
+	chainIntact := true
+	var failureDetail string
+
+	for i := 1; i < len(s.auditLedger); i++ {
+		prev := s.auditLedger[i-1]
+		curr := s.auditLedger[i]
+
+		if curr.PrevBlockHash != prev.BlockHash {
+			chainIntact = false
+			failureDetail = fmt.Sprintf("Hash break between block #%d and #%d", prev.Index, curr.Index)
+			break
+		}
+
+		rawDetails, _ := json.Marshal(curr.Details)
+		header := fmt.Sprintf("%d:%s:%s:%s:%s:%s:%s:%d",
+			curr.Index, curr.SessionID, curr.WarrantID, curr.EventType, curr.OfficerID, curr.PrevBlockHash, string(rawDetails), curr.Timestamp.Unix())
+		recomputed := sha256.Sum256([]byte(header))
+		expectedHash := hex.EncodeToString(recomputed[:])
+
+		if curr.BlockHash != expectedHash {
+			chainIntact = false
+			failureDetail = fmt.Sprintf("Block #%d payload corrupted; recomputed hash mismatch", curr.Index)
+			break
+		}
+	}
+
+	details := "All audit ledger blocks successfully validated against SHA-256 hash chains. Chain of custody is intact."
+	if !chainIntact {
+		details = fmt.Sprintf("Chain integrity violation: %s", failureDetail)
+	}
+
+	return &models.EvidenceVerificationResult{
+		SessionID:          sessionID,
+		TotalBlocksChecked: len(s.auditLedger),
+		ChainIntact:         chainIntact,
+		GenesisHash:         genesis.BlockHash,
+		LatestBlockHash:     latest.BlockHash,
+		ComplianceStandard:  "Section 65B Indian Evidence Act / ISO/IEC 27037",
+		VerifiedAt:          time.Now(),
+		Details:             details,
+	}, nil
+}
+
+func (s *SessionService) GetTemplates() map[string]string {
+	return map[string]string{
+		"triage": `// JOCKY Forensic Script — Fast Triage Scan
+forensic session {
+    target: "10.0.5.42";
+    warrant: "NTRO-2026-LINUX-0089";
+    profile: triage;
+}`,
+		"windows-persistence": `// JOCKY Forensic Script — Windows Persistence & Event Logs
+forensic session {
+    target: "192.168.1.105";
+    warrant: "NTRO-2026-CYBER-0421";
+    collect {
+        registry: HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run,
+        disk: mft_scan,
+        network: active_connections
+    };
+    encrypt aes256(key: hsm_derived);
+    transmit via: "wss://forensics-gw.ntro.gov.in/telemetry";
+}`,
+		"linux-ebpf": `// JOCKY Forensic Script — Linux Kernel eBPF Telemetry
+forensic session {
+    target: "10.0.5.42";
+    warrant: "NTRO-2026-LINUX-0089";
+    collect {
+        proc: all_processes,
+        auditd: execve | connect,
+        network: active_connections
+    };
+    encrypt chacha20(key: hsm_derived);
+    transmit via: "wss://telemetry-stream.ntro.gov.in/evidence";
+}`,
+		"pqc-vault": `// JOCKY Forensic Script — Post-Quantum Secure Vault Transmission
+forensic session {
+    target: "10.100.4.12";
+    warrant: "NTRO-2026-INFIL-9901";
+    profile: deep_audit;
+    encrypt ml_kem(key: hsm_derived);
+    transmit via: "wss://pqc-collector.ntro.gov.in/vault";
+}`,
+	}
+}
+

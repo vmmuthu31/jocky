@@ -42,6 +42,9 @@ func SetupRouter(sessionSvc *services.SessionService, warrantSvc *services.Warra
 		v1.POST("/warrants", handler.HandleRegisterWarrant)
 
 		v1.GET("/audit/ledger", handler.HandleGetAuditLedger)
+		v1.GET("/evidence/verify", handler.HandleVerifyEvidence)
+
+		v1.GET("/templates", handler.HandleGetTemplates)
 	}
 
 	r.GET("/ws/agent", func(c *gin.Context) {

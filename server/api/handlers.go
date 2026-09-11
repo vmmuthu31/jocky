@@ -94,3 +94,19 @@ func (h *ServerHandler) HandleRegisterWarrant(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, gin.H{"status": "warrant_registered", "id": warrant.ID})
 }
+
+func (h *ServerHandler) HandleGetTemplates(c *gin.Context) {
+	templates := h.sessionSvc.GetTemplates()
+	c.JSON(http.StatusOK, gin.H{"templates": templates})
+}
+
+func (h *ServerHandler) HandleVerifyEvidence(c *gin.Context) {
+	sessionID := c.DefaultQuery("session_id", "ALL")
+	result, err := h.sessionSvc.VerifyEvidenceChain(sessionID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, result)
+}
+
