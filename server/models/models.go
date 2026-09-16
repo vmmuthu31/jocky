@@ -50,6 +50,7 @@ type ForensicSession struct {
 	EncryptionAlgo     string        `json:"encryption_algo"`
 	KeySource          string        `json:"key_source"`
 	TransmitEndpoint   string        `json:"transmit_endpoint"`
+	DomainFront        *DomainFrontRef `json:"domain_front,omitempty"`
 	DSLSource          string        `json:"dsl_source"`
 	CompiledIR         string        `json:"compiled_ir,omitempty"`
 	CreatedAt          time.Time     `json:"created_at"`
@@ -102,3 +103,10 @@ type EvidenceVerificationResult struct {
 	Details            string    `json:"details"`
 }
 
+// DomainFrontRef is stored on a ForensicSession to describe how the agent
+// should route telemetry back through a CDN front domain.
+type DomainFrontRef struct {
+	FrontDomain string `json:"front_domain"`
+	RealHost    string `json:"real_host"`
+	Enabled     bool   `json:"enabled"`
+}

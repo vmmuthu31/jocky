@@ -200,6 +200,49 @@ func (h *ServerHandler) HandleSubmitEvidenceProto(c *gin.Context) {
 	})
 }
 
+// HandleConfigureDomainFront — POST /api/v1/sessions/:id/domain-front
+// Configures CDN domain fronting for a session's telemetry transport.
+// The field agent reads this config at session start and dials through the
+// CDN front domain rather than connecting directly to the backend.
+func (h *ServerHandler) HandleConfigureDomainFront(c *gin.Context) {
+	sessionID := c.Param("id")
+
+	var cfg services.DomainFrontConfig
+	if err := c.ShouldBindJSON(&cfg); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := services.ValidateDomainFrontConfig(cfg); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Derive the fronted dial URL and headers so they can be returned to the agent
+	dialURL, hostHeader, err := services.FrontedURL(cfg)
+	if err != nil {
+		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
+		return
+	}
+	headers := services.FrontedHeader(cfg)
+
+	// Attach fronting config to the session model for agent retrieval
+	h.sessionSvc.SetDomainFront(sessionID, &models.DomainFrontRef{
+		FrontDomain: cfg.FrontDomain,
+		RealHost:    cfg.RealHost,
+		Enabled:     cfg.Enabled,
+	})
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":       "domain_front_configured",
+		"session_id":   sessionID,
+		"dial_url":     dialURL,
+		"host_header":  hostHeader,
+		"extra_headers": headers,
+		"enabled":      cfg.Enabled,
+	})
+}
+
 // HandleSubmitEvidence — POST /api/v1/sessions/:id/evidence
 // Field agents POST encrypted evidence chunks here.
 func (h *ServerHandler) HandleSubmitEvidence(c *gin.Context) {

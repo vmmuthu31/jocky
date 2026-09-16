@@ -368,6 +368,24 @@ func (s *SessionService) VerifyEvidenceChain(sessionID string) (*models.Evidence
 	}, nil
 }
 
+// SetDomainFront attaches a CDN domain-fronting config to an existing session.
+func (s *SessionService) SetDomainFront(sessionID string, ref *models.DomainFrontRef) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	session, exists := s.sessions[sessionID]
+	if !exists {
+		return
+	}
+	session.DomainFront = ref
+	s.sessions[sessionID] = session
+
+	s.appendAuditBlock(sessionID, session.WarrantID, "DOMAIN_FRONT_CONFIGURED", "SYSTEM", map[string]interface{}{
+		"front_domain": ref.FrontDomain,
+		"real_host":    ref.RealHost,
+		"enabled":      ref.Enabled,
+	})
+}
+
 func (s *SessionService) GetTemplates() map[string]string {
 	return map[string]string{
 		"triage": `// JOCKY Forensic Script — Fast Triage Scan

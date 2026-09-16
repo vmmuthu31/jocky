@@ -42,6 +42,7 @@ func SetupRouter(sessionSvc *services.SessionService, warrantSvc *services.Warra
 		v1.POST("/sessions/:id/approve", handler.HandleApproveSession)
 		v1.POST("/sessions/:id/evidence", handler.HandleSubmitEvidence)
 		v1.POST("/sessions/:id/evidence/proto", handler.HandleSubmitEvidenceProto)
+		v1.POST("/sessions/:id/domain-front", handler.HandleConfigureDomainFront)
 
 		v1.GET("/agents", handler.HandleListAgents)
 
