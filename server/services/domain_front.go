@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"crypto/tls"
 	"fmt"
 	"net"
@@ -65,15 +66,13 @@ func DomainFrontTransport(cfg DomainFrontConfig) (*http.Transport, error) {
 			MinVersion: tls.VersionTLS13,
 		},
 		// Dial to the CDN edge (FrontDomain), not the real backend host
-		DialContext: func(ctx interface{ Deadline() (time.Time, bool) }, network, addr string) (net.Conn, error) {
+		DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
 			// Replace any resolved addr with the CDN front domain
 			host := cfg.FrontDomain
 			if !strings.Contains(host, ":") {
 				host = host + ":443"
 			}
-			d := &net.Dialer{Timeout: 15 * time.Second, KeepAlive: 30 * time.Second}
-			_ = d
-			return dialer.Dial(network, host)
+			return dialer.DialContext(ctx, network, host)
 		},
 		MaxIdleConns:        10,
 		IdleConnTimeout:     90 * time.Second,
