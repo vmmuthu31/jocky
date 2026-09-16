@@ -23,28 +23,42 @@ type SessionService struct {
 	auditLedger  []models.AuditBlock
 	compilerPath string
 	warrantSvc   *WarrantService
+	ledgerStore  *LedgerStore
 }
 
 func NewSessionService(warrantSvc *WarrantService, compilerPath string) *SessionService {
+	return NewSessionServiceWithStore(warrantSvc, compilerPath, NewLedgerStore("."))
+}
+
+func NewSessionServiceWithStore(warrantSvc *WarrantService, compilerPath string, store *LedgerStore) *SessionService {
 	genesisBlock := models.AuditBlock{
-		Index:        0,
-		SessionID:    "GENESIS",
-		WarrantID:    "GENESIS",
-		EventType:    "SYSTEM_INIT",
-		OfficerID:    "SYSTEM",
-		Details:      map[string]interface{}{"status": "ledger_initialized"},
+		Index:         0,
+		SessionID:     "GENESIS",
+		WarrantID:     "GENESIS",
+		EventType:     "SYSTEM_INIT",
+		OfficerID:     "SYSTEM",
+		Details:       map[string]interface{}{"status": "ledger_initialized"},
 		PrevBlockHash: "0000000000000000000000000000000000000000000000000000000000000000",
-		BlockHash:    "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-		Timestamp:    time.Now(),
+		BlockHash:     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+		Timestamp:     time.Now(),
 	}
 
-	return &SessionService{
+	svc := &SessionService{
 		sessions:     make(map[string]models.ForensicSession),
 		agents:       make(map[string]models.Agent),
 		auditLedger:  []models.AuditBlock{genesisBlock},
 		compilerPath: compilerPath,
 		warrantSvc:   warrantSvc,
+		ledgerStore:  store,
 	}
+
+	// Try to load persisted ledger; fall back to genesis block if absent/corrupt
+	if store != nil {
+		if persisted, err := store.Load(); err == nil && len(persisted) > 0 {
+			svc.auditLedger = persisted
+		}
+	}
+	return svc
 }
 
 func (s *SessionService) CreateSession(warrantID, targetIP, agentID, dslSource, targetOS string, officerID string) (*models.ForensicSession, error) {
@@ -77,15 +91,92 @@ func (s *SessionService) CreateSession(warrantID, targetIP, agentID, dslSource, 
 		CreatedAt:        time.Now(),
 	}
 
+	session.CreatedByOfficer = officerID
+	session.PendingApproval = true
 	s.sessions[sessionID] = session
 
 	s.appendAuditBlock(sessionID, warrantID, "SESSION_CREATED", officerID, map[string]interface{}{
-		"target_ip": targetIP,
-		"agent_id":  agentID,
-		"target_os": targetOS,
+		"target_ip":        targetIP,
+		"agent_id":         agentID,
+		"target_os":        targetOS,
+		"pending_approval": true,
 	})
 
 	return &session, nil
+}
+
+// ApproveSession allows a second officer to countersign a pending session.
+// The approving officer must differ from the session creator.
+func (s *SessionService) ApproveSession(sessionID, officerID, notes string) (*models.ForensicSession, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	session, exists := s.sessions[sessionID]
+	if !exists {
+		return nil, errors.New("session not found")
+	}
+	if !session.PendingApproval {
+		return nil, errors.New("session is not awaiting approval")
+	}
+	if session.CreatedByOfficer == officerID {
+		return nil, errors.New("approving officer must differ from creating officer (dual-control policy)")
+	}
+
+	now := time.Now()
+	session.ApprovedByOfficer = officerID
+	session.ApprovedAt = &now
+	session.PendingApproval = false
+	session.Status = models.StatusRunning
+	s.sessions[sessionID] = session
+
+	detail := map[string]interface{}{
+		"approving_officer": officerID,
+		"creating_officer":  session.CreatedByOfficer,
+	}
+	if notes != "" {
+		detail["notes"] = notes
+	}
+	s.appendAuditBlock(sessionID, session.WarrantID, "SESSION_APPROVED", officerID, detail)
+
+	return &session, nil
+}
+
+// SubmitEvidence records an encrypted evidence chunk from a field agent.
+func (s *SessionService) SubmitEvidence(ev models.EvidenceRecord) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	session, exists := s.sessions[ev.SessionID]
+	if !exists {
+		return fmt.Errorf("session '%s' not found", ev.SessionID)
+	}
+	if session.Status != models.StatusRunning {
+		return fmt.Errorf("session '%s' is not active (status: %s)", ev.SessionID, session.Status)
+	}
+
+	s.appendAuditBlock(ev.SessionID, session.WarrantID, "EVIDENCE_RECEIVED", "AGENT", map[string]interface{}{
+		"artifact_type":  ev.ArtifactType,
+		"chunk":          fmt.Sprintf("%d/%d", ev.ChunkIndex+1, ev.TotalChunks),
+		"sha256":         ev.SHA256Hash,
+		"encrypted_size": ev.EncryptedSize,
+	})
+
+	// Mark session completed when final chunk arrives
+	if ev.ChunkIndex+1 == ev.TotalChunks {
+		now := time.Now()
+		session.Status = models.StatusCompleted
+		session.CompletedAt = &now
+		s.sessions[ev.SessionID] = session
+		s.appendAuditBlock(ev.SessionID, session.WarrantID, "SESSION_COMPLETED", "SYSTEM", map[string]interface{}{
+			"total_chunks": ev.TotalChunks,
+		})
+	}
+	return nil
+}
+
+// CompileDSLPublic exposes the compiler invocation to handlers without creating a session.
+func (s *SessionService) CompileDSLPublic(dslSource, targetOS string) (string, error) {
+	return s.compileDSL(dslSource, targetOS)
 }
 
 func (s *SessionService) compileDSL(dslSource, targetOS string) (string, error) {
@@ -106,7 +197,10 @@ func (s *SessionService) compileDSL(dslSource, targetOS string) (string, error) 
 	}
 
 	if compiler == "" {
-		return "; Simulated LLVM IR (Compiler binary not located)", nil
+		return "", fmt.Errorf(
+			"jocky-compile binary not found; build the compiler with `cargo build --release` " +
+				"in the compiler/ directory and set JOCKY_COMPILER_PATH or pass --compiler",
+		)
 	}
 
 	tmpDir, err := os.MkdirTemp("", "jocky_compile_*")
@@ -210,6 +304,14 @@ func (s *SessionService) appendAuditBlock(sessionID, warrantID, eventType, offic
 	}
 
 	s.auditLedger = append(s.auditLedger, block)
+
+	// Persist to disk asynchronously so the hot path isn't blocked
+	if s.ledgerStore != nil {
+		snapshot := append([]models.AuditBlock(nil), s.auditLedger...)
+		go func() {
+			_ = s.ledgerStore.Save(snapshot)
+		}()
+	}
 }
 
 func (s *SessionService) VerifyEvidenceChain(sessionID string) (*models.EvidenceVerificationResult, error) {

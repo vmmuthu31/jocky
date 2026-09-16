@@ -143,3 +143,245 @@ func TestEvidenceVerificationAPI(t *testing.T) {
 	}
 }
 
+// createSession is a test helper that POSTs a session and returns the parsed response.
+func createSession(t *testing.T, router http.Handler, officerID string) models.ForensicSession {
+	t.Helper()
+	body := map[string]interface{}{
+		"warrant_id": "NTRO-2026-CYBER-0421",
+		"target_ip":  "10.0.0.1",
+		"agent_id":   "agent-test",
+		"dsl_source": `forensic session { target: "10.0.0.1"; warrant: "NTRO-2026-CYBER-0421"; collect { registry: HKLM }; encrypt aes256(key: hsm_derived); transmit via: "wss://test"; }`,
+		"target_os":  "windows",
+		"officer_id": officerID,
+	}
+	bodyBytes, _ := json.Marshal(body)
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/api/v1/sessions", bytes.NewBuffer(bodyBytes))
+	req.Header.Set("Content-Type", "application/json")
+	router.ServeHTTP(w, req)
+	if w.Code != http.StatusCreated {
+		t.Fatalf("createSession: expected 201, got %d: %s", w.Code, w.Body.String())
+	}
+	var s models.ForensicSession
+	if err := json.Unmarshal(w.Body.Bytes(), &s); err != nil {
+		t.Fatalf("createSession: parse error: %v", err)
+	}
+	return s
+}
+
+// TestMultiOfficerApproval verifies dual-control approval workflow.
+func TestMultiOfficerApproval(t *testing.T) {
+	warrantSvc := services.NewWarrantService()
+	sessionSvc := services.NewSessionService(warrantSvc, "")
+	router := SetupRouter(sessionSvc, warrantSvc)
+
+	// Create session as OFFICER-A
+	session := createSession(t, router, "OFFICER-A")
+	if !session.PendingApproval {
+		t.Fatal("new session should be pending approval")
+	}
+	if session.CreatedByOfficer != "OFFICER-A" {
+		t.Fatalf("expected creator OFFICER-A, got %s", session.CreatedByOfficer)
+	}
+
+	// OFFICER-A tries to approve their own session — must fail (dual-control)
+	selfApprove := map[string]string{"officer_id": "OFFICER-A"}
+	selfBytes, _ := json.Marshal(selfApprove)
+	wSelf := httptest.NewRecorder()
+	reqSelf, _ := http.NewRequest("POST", "/api/v1/sessions/"+session.ID+"/approve", bytes.NewBuffer(selfBytes))
+	reqSelf.Header.Set("Content-Type", "application/json")
+	router.ServeHTTP(wSelf, reqSelf)
+	if wSelf.Code != http.StatusUnprocessableEntity {
+		t.Fatalf("self-approval: expected 422, got %d", wSelf.Code)
+	}
+
+	// OFFICER-B approves — must succeed
+	approve := map[string]string{"officer_id": "OFFICER-B", "notes": "looks good"}
+	approveBytes, _ := json.Marshal(approve)
+	wApprove := httptest.NewRecorder()
+	reqApprove, _ := http.NewRequest("POST", "/api/v1/sessions/"+session.ID+"/approve", bytes.NewBuffer(approveBytes))
+	reqApprove.Header.Set("Content-Type", "application/json")
+	router.ServeHTTP(wApprove, reqApprove)
+	if wApprove.Code != http.StatusOK {
+		t.Fatalf("approval by OFFICER-B: expected 200, got %d: %s", wApprove.Code, wApprove.Body.String())
+	}
+
+	var approveResp struct {
+		Status  string               `json:"status"`
+		Session models.ForensicSession `json:"session"`
+	}
+	if err := json.Unmarshal(wApprove.Body.Bytes(), &approveResp); err != nil {
+		t.Fatalf("parse approval response: %v", err)
+	}
+	if approveResp.Session.Status != models.StatusRunning {
+		t.Fatalf("expected session status RUNNING after approval, got %s", approveResp.Session.Status)
+	}
+	if approveResp.Session.ApprovedByOfficer != "OFFICER-B" {
+		t.Fatalf("expected ApprovedByOfficer OFFICER-B, got %s", approveResp.Session.ApprovedByOfficer)
+	}
+}
+
+// TestDuplicateApprovalRejected ensures a session cannot be approved twice.
+func TestDuplicateApprovalRejected(t *testing.T) {
+	warrantSvc := services.NewWarrantService()
+	sessionSvc := services.NewSessionService(warrantSvc, "")
+	router := SetupRouter(sessionSvc, warrantSvc)
+
+	session := createSession(t, router, "OFFICER-X")
+
+	approve := map[string]string{"officer_id": "OFFICER-Y"}
+	approveBytes, _ := json.Marshal(approve)
+
+	do := func() int {
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("POST", "/api/v1/sessions/"+session.ID+"/approve", bytes.NewBuffer(approveBytes))
+		req.Header.Set("Content-Type", "application/json")
+		router.ServeHTTP(w, req)
+		return w.Code
+	}
+
+	if code := do(); code != http.StatusOK {
+		t.Fatalf("first approval: expected 200, got %d", code)
+	}
+	if code := do(); code != http.StatusUnprocessableEntity {
+		t.Fatalf("second approval: expected 422 (already approved), got %d", code)
+	}
+}
+
+// TestEvidenceSubmission verifies evidence chunks are accepted on an active session.
+func TestEvidenceSubmission(t *testing.T) {
+	warrantSvc := services.NewWarrantService()
+	sessionSvc := services.NewSessionService(warrantSvc, "")
+	router := SetupRouter(sessionSvc, warrantSvc)
+
+	session := createSession(t, router, "OFFICER-1")
+
+	// Approve first
+	approve := map[string]string{"officer_id": "OFFICER-2"}
+	approveBytes, _ := json.Marshal(approve)
+	wA := httptest.NewRecorder()
+	reqA, _ := http.NewRequest("POST", "/api/v1/sessions/"+session.ID+"/approve", bytes.NewBuffer(approveBytes))
+	reqA.Header.Set("Content-Type", "application/json")
+	router.ServeHTTP(wA, reqA)
+	if wA.Code != http.StatusOK {
+		t.Fatalf("approval failed: %d", wA.Code)
+	}
+
+	// Submit evidence chunk
+	ev := map[string]interface{}{
+		"artifact_type": "registry",
+		"chunk_index":   0,
+		"total_chunks":  1,
+		"sha256_hash":   "abc123",
+		"encrypted_size": 512,
+	}
+	evBytes, _ := json.Marshal(ev)
+	wE := httptest.NewRecorder()
+	reqE, _ := http.NewRequest("POST", "/api/v1/sessions/"+session.ID+"/evidence", bytes.NewBuffer(evBytes))
+	reqE.Header.Set("Content-Type", "application/json")
+	router.ServeHTTP(wE, reqE)
+	if wE.Code != http.StatusCreated {
+		t.Fatalf("evidence submission: expected 201, got %d: %s", wE.Code, wE.Body.String())
+	}
+
+	// Session should now be COMPLETED (single chunk)
+	wS := httptest.NewRecorder()
+	reqS, _ := http.NewRequest("GET", "/api/v1/sessions/"+session.ID, nil)
+	router.ServeHTTP(wS, reqS)
+	var completed models.ForensicSession
+	json.Unmarshal(wS.Body.Bytes(), &completed)
+	if completed.Status != models.StatusCompleted {
+		t.Fatalf("expected COMPLETED after final chunk, got %s", completed.Status)
+	}
+}
+
+// TestEvidenceOnPendingSessionRejected ensures evidence cannot be submitted before approval.
+func TestEvidenceOnPendingSessionRejected(t *testing.T) {
+	warrantSvc := services.NewWarrantService()
+	sessionSvc := services.NewSessionService(warrantSvc, "")
+	router := SetupRouter(sessionSvc, warrantSvc)
+
+	session := createSession(t, router, "OFFICER-P")
+
+	ev := map[string]interface{}{
+		"artifact_type": "memory",
+		"chunk_index":   0,
+		"total_chunks":  1,
+		"sha256_hash":   "deadbeef",
+		"encrypted_size": 256,
+	}
+	evBytes, _ := json.Marshal(ev)
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/api/v1/sessions/"+session.ID+"/evidence", bytes.NewBuffer(evBytes))
+	req.Header.Set("Content-Type", "application/json")
+	router.ServeHTTP(w, req)
+	if w.Code != http.StatusUnprocessableEntity {
+		t.Fatalf("expected 422 for evidence on pending session, got %d", w.Code)
+	}
+}
+
+// TestExpiredWarrantRejected verifies sessions cannot be created with an expired warrant.
+func TestExpiredWarrantRejected(t *testing.T) {
+	warrantSvc := services.NewWarrantService()
+	sessionSvc := services.NewSessionService(warrantSvc, "")
+	router := SetupRouter(sessionSvc, warrantSvc)
+
+	body := map[string]interface{}{
+		"warrant_id": "EXPIRED-WARRANT-0000",
+		"target_ip":  "10.0.0.1",
+		"agent_id":   "agent-test",
+		"dsl_source": `forensic session { target: "10.0.0.1"; warrant: "EXPIRED-WARRANT-0000"; encrypt aes256(key: hsm_derived); transmit via: "wss://test"; }`,
+		"target_os":  "linux",
+		"officer_id": "OFFICER-Z",
+	}
+	bodyBytes, _ := json.Marshal(body)
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/api/v1/sessions", bytes.NewBuffer(bodyBytes))
+	req.Header.Set("Content-Type", "application/json")
+	router.ServeHTTP(w, req)
+	if w.Code != http.StatusUnprocessableEntity {
+		t.Fatalf("expected 422 for expired warrant, got %d", w.Code)
+	}
+}
+
+// TestChainIntegrityAfterEvents verifies the blockchain ledger stays intact after multiple events.
+func TestChainIntegrityAfterEvents(t *testing.T) {
+	warrantSvc := services.NewWarrantService()
+	sessionSvc := services.NewSessionService(warrantSvc, "")
+	router := SetupRouter(sessionSvc, warrantSvc)
+
+	// Create + approve + submit evidence
+	session := createSession(t, router, "OFFICER-C1")
+
+	approveBody, _ := json.Marshal(map[string]string{"officer_id": "OFFICER-C2"})
+	wA := httptest.NewRecorder()
+	reqA, _ := http.NewRequest("POST", "/api/v1/sessions/"+session.ID+"/approve", bytes.NewBuffer(approveBody))
+	reqA.Header.Set("Content-Type", "application/json")
+	router.ServeHTTP(wA, reqA)
+
+	evBody, _ := json.Marshal(map[string]interface{}{
+		"artifact_type": "disk_mft", "chunk_index": 0, "total_chunks": 1,
+		"sha256_hash": "cafebabe", "encrypted_size": 1024,
+	})
+	wE := httptest.NewRecorder()
+	reqE, _ := http.NewRequest("POST", "/api/v1/sessions/"+session.ID+"/evidence", bytes.NewBuffer(evBody))
+	reqE.Header.Set("Content-Type", "application/json")
+	router.ServeHTTP(wE, reqE)
+
+	// Verify chain is still intact
+	wV := httptest.NewRecorder()
+	reqV, _ := http.NewRequest("GET", "/api/v1/evidence/verify?session_id=ALL", nil)
+	router.ServeHTTP(wV, reqV)
+	if wV.Code != http.StatusOK {
+		t.Fatalf("verify: expected 200, got %d", wV.Code)
+	}
+	var result models.EvidenceVerificationResult
+	json.Unmarshal(wV.Body.Bytes(), &result)
+	if !result.ChainIntact {
+		t.Fatalf("expected chain intact after events, got: %s", result.Details)
+	}
+	if result.TotalBlocksChecked < 4 {
+		t.Fatalf("expected >=4 blocks (genesis+created+approved+evidence+completed), got %d", result.TotalBlocksChecked)
+	}
+}
+

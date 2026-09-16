@@ -115,30 +115,53 @@ fn main() -> anyhow::Result<()> {
 
             match test_type.as_str() {
                 "registry" => {
+                    // Build a minimal valid REGF hive (magic + header fields)
+                    // so the parser can validate the binary format correctly.
                     let path = f("/tmp/jocky_test.hiv");
-                    std::fs::write(&path, b"mock registry hive").ok();
+                    let mut hive = vec![0u8; 0x30];
+                    hive[0..4].copy_from_slice(b"regf");
+                    hive[0x24..0x28].copy_from_slice(&32i32.to_le_bytes());
+                    std::fs::write(&path, &hive).ok();
                     match RegistryParser::parse_hive(&path) {
-                        Ok(keys) => println!("✓ RegistryParser: {} keys", keys.len()),
+                        Ok(keys) => println!("✓ RegistryParser: {} records", keys.len()),
                         Err(e)   => eprintln!("✗ RegistryParser: {}", e),
                     }
                 }
                 "mft" => {
-                    match MFTParser::parse_mft("/dev/mock") {
-                        Ok(entries) => println!("✓ MFTParser: {} entries", entries.len()),
+                    // Build a minimal valid MFT image (two FILE records)
+                    let path = f("/tmp/jocky_test_mft.bin");
+                    let record_size = 1024usize;
+                    let mut mft = vec![0u8; record_size * 2];
+                    mft[0..4].copy_from_slice(b"FILE");
+                    mft[0x16..0x18].copy_from_slice(&1u16.to_le_bytes()); // in-use
+                    mft[record_size..record_size + 4].copy_from_slice(b"FILE");
+                    // second record has flags=0 (deleted)
+                    std::fs::write(&path, &mft).ok();
+                    match MFTParser::parse_mft(&path) {
+                        Ok(entries) => println!("✓ MFTParser: {} FILE records ({} deleted)",
+                            entries.len(), entries.iter().filter(|e| e.path.contains("DELETED")).count()),
                         Err(e)      => eprintln!("✗ MFTParser: {}", e),
                     }
                 }
                 "proc" => {
                     match ProcParser::enumerate_processes() {
                         Ok(procs) => println!("✓ ProcParser: {} processes", procs.len()),
-                        Err(e)    => eprintln!("⊘ ProcParser (may be non-Linux): {}", e),
+                        Err(e)    => eprintln!("⊘ ProcParser (requires Linux /proc): {}", e),
                     }
                 }
                 "evtx" => {
+                    // Build a minimal valid EVTX file
                     let path = f("/tmp/jocky_test.evtx");
-                    std::fs::write(&path, b"mock evtx").ok();
+                    let header_size = 0x1000usize;
+                    let mut evtx = vec![0u8; header_size + 0x20];
+                    evtx[0..8].copy_from_slice(b"ElfFile\0");
+                    evtx[0x18..0x20].copy_from_slice(&1u64.to_le_bytes()); // num_chunks
+                    evtx[header_size..header_size + 8].copy_from_slice(b"ElfChnk\0");
+                    evtx[header_size + 0x08..header_size + 0x10].copy_from_slice(&1u64.to_le_bytes());
+                    evtx[header_size + 0x10..header_size + 0x18].copy_from_slice(&50u64.to_le_bytes());
+                    std::fs::write(&path, &evtx).ok();
                     match EventLogParser::parse_evtx(&path) {
-                        Ok(events) => println!("✓ EventLogParser: {} events", events.len()),
+                        Ok(events) => println!("✓ EventLogParser: {} chunks parsed", events.len()),
                         Err(e)     => eprintln!("✗ EventLogParser: {}", e),
                     }
                 }
@@ -151,9 +174,10 @@ fn main() -> anyhow::Result<()> {
                     }
                 }
                 "ebpf" => {
-                    let batch = jocky_compiler::forensics::EbpfProbeManager::create_synthetic_telemetry("target-host");
-                    println!("✓ EbpfProbeManager: {} exec events, {} file events, {} socket events",
-                        batch.exec_events.len(), batch.file_events.len(), batch.socket_events.len());
+                    let (source, batch) = jocky_compiler::forensics::EbpfProbeManager::emit_and_describe("target-host");
+                    println!("✓ EbpfProbeEmitter: {} bytes of BPF C source emitted", source.len());
+                    println!("  probe={} kernel={}", batch.probe_name, batch.host_kernel);
+                    println!("  Note: live event collection requires Linux with BPF support (kernel ≥5.8)");
                 }
                 other => eprintln!("Unknown test type '{}'. Use: registry | mft | proc | evtx | auditd | ebpf", other),
             }
@@ -240,11 +264,10 @@ forensic session {
                 for item in &session.collect_items {
                     match item.artifact_type {
                         jocky_compiler::ast::ArtifactType::Proc => {
-                            let procs = match ProcParser::enumerate_processes() {
-                                Ok(p) => format!("{} live host processes found", p.len()),
-                                Err(_) => "Simulated: 42 processes inspected".to_string(),
-                            };
-                            println!("  • [/proc]: {}", procs);
+                            match ProcParser::enumerate_processes() {
+                                Ok(p) => println!("  • [/proc]: {} live host processes found", p.len()),
+                                Err(e) => println!("  • [/proc]: unavailable on this host ({}) — agent must run on Linux target", e),
+                            }
                         }
                         jocky_compiler::ast::ArtifactType::Network => {
                             println!("  • [network]: Ingested active socket telemetry (0 anomalous foreign sockets)");
@@ -264,7 +287,7 @@ forensic session {
                     }
                 }
             }
-            println!("Status: ALL ARTIFACT DIRECTIVES SIMULATED AND VERIFIED OK");
+            println!("Status: DRY-RUN COMPLETE — deploy agent binary to target host to execute live collection");
         }
     }
 

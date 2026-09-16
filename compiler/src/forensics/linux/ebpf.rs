@@ -1,5 +1,4 @@
 use serde::{Deserialize, Serialize};
-use anyhow::Result;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct EbpfProcessExecEvent {
@@ -40,93 +39,28 @@ pub struct EbpfTelemetryBatch {
     pub socket_events: Vec<EbpfSocketEvent>,
 }
 
+/// Probe source emitter and telemetry type definitions.
+///
+/// Real event collection requires a Linux host with BPF support and the
+/// compiled probe object loaded via libbpf (clang -target bpf -O2).
+/// On non-Linux hosts this module emits the probe BPF C source so it can be
+/// verified, but returns empty event batches — no fabricated data.
 pub struct EbpfProbeManager;
 
 impl EbpfProbeManager {
-    pub fn create_synthetic_telemetry(host: &str) -> EbpfTelemetryBatch {
-        EbpfTelemetryBatch {
+    /// Emit the compilable BPF C source and return an empty telemetry batch.
+    ///
+    /// Call `EbpfProbeEmitter::emit_bpf_c_source()` directly if you only need
+    /// the source without a batch wrapper.
+    pub fn emit_and_describe(host: &str) -> (String, EbpfTelemetryBatch) {
+        let source = crate::runtime::ebpf_probes::EbpfProbeEmitter::emit_bpf_c_source();
+        let batch = EbpfTelemetryBatch {
             probe_name: format!("jocky-ebpf-probe-{}", host),
-            host_kernel: "Linux 5.15.0-generic".to_string(),
-            exec_events: vec![
-                EbpfProcessExecEvent {
-                    timestamp_ns: 1694430720000000000,
-                    pid: 4892,
-                    ppid: 1024,
-                    uid: 0,
-                    comm: "curl".to_string(),
-                    filename: "/usr/bin/curl".to_string(),
-                    args: vec!["curl".to_string(), "-s".to_string(), "https://telemetry.jocky.internal".to_string()],
-                },
-                EbpfProcessExecEvent {
-                    timestamp_ns: 1694430721000000000,
-                    pid: 4895,
-                    ppid: 4892,
-                    uid: 1000,
-                    comm: "sh".to_string(),
-                    filename: "/tmp/suspicious_script.sh".to_string(),
-                    args: vec!["/bin/sh".to_string(), "/tmp/suspicious_script.sh".to_string()],
-                },
-            ],
-            file_events: vec![
-                EbpfFileOpenEvent {
-                    timestamp_ns: 1694430720500000000,
-                    pid: 4892,
-                    filename: "/etc/passwd".to_string(),
-                    flags: 0,
-                },
-            ],
-            socket_events: vec![
-                EbpfSocketEvent {
-                    timestamp_ns: 1694430720600000000,
-                    pid: 4892,
-                    src_ip: "10.0.5.42".to_string(),
-                    dst_ip: "192.168.1.100".to_string(),
-                    src_port: 48291,
-                    dst_port: 443,
-                    protocol: "TCP".to_string(),
-                },
-            ],
-        }
-    }
-
-    pub fn filter_suspicious_executions(batch: &EbpfTelemetryBatch) -> Vec<&EbpfProcessExecEvent> {
-        batch.exec_events
-            .iter()
-            .filter(|e| {
-                e.filename.starts_with("/tmp/") ||
-                e.filename.starts_with("/dev/shm/") ||
-                e.filename.contains("curl") ||
-                e.filename.contains("wget")
-            })
-            .collect()
-    }
-
-    pub fn serialize_batch(batch: &EbpfTelemetryBatch) -> Result<String> {
-        serde_json::to_string_pretty(batch).map_err(|e| anyhow::anyhow!("Serialization error: {}", e))
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_ebpf_synthetic_telemetry() {
-        let batch = EbpfProbeManager::create_synthetic_telemetry("srv-01");
-        assert_eq!(batch.exec_events.len(), 2);
-        assert_eq!(batch.file_events.len(), 1);
-        assert_eq!(batch.socket_events.len(), 1);
-
-        let suspicious = EbpfProbeManager::filter_suspicious_executions(&batch);
-        assert_eq!(suspicious.len(), 2);
-        assert!(suspicious.iter().any(|e| e.filename.starts_with("/tmp/")));
-    }
-
-    #[test]
-    fn test_ebpf_serialization() {
-        let batch = EbpfProbeManager::create_synthetic_telemetry("test-host");
-        let json = EbpfProbeManager::serialize_batch(&batch).expect("JSON serialization must succeed");
-        assert!(json.contains("jocky-ebpf-probe-test-host"));
-        assert!(json.contains("/usr/bin/curl"));
+            host_kernel: "unavailable — agent must run on Linux with BPF support (kernel ≥5.8)".to_string(),
+            exec_events: vec![],
+            file_events: vec![],
+            socket_events: vec![],
+        };
+        (source, batch)
     }
 }

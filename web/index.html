@@ -132,6 +132,44 @@
       </table>
     </div>
 
+    <!-- Multi-Officer Approval Panel -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">🪪 Multi-Officer Approval (Dual-Control Policy)</div>
+        <span class="brand-badge">IT Act Sec 69 Compliance</span>
+      </div>
+      <div style="display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 14px;">
+        <div style="flex: 1; min-width: 160px;">
+          <label style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 4px;">APPROVING OFFICER ID</label>
+          <input type="text" id="approval-officer-id" placeholder="OFFICER-ID (must differ from creator)"
+            style="width: 100%; background: #0d121d; color: var(--text-primary); border: 1px solid var(--border-subtle); padding: 8px 12px; border-radius: 6px; font-size: 0.85rem; box-sizing: border-box;" />
+        </div>
+        <div style="flex: 1; min-width: 160px;">
+          <label style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 4px;">APPROVAL NOTES (OPTIONAL)</label>
+          <input type="text" id="approval-notes" placeholder="Verified warrant signature, target confirmed..."
+            style="width: 100%; background: #0d121d; color: var(--text-primary); border: 1px solid var(--border-subtle); padding: 8px 12px; border-radius: 6px; font-size: 0.85rem; box-sizing: border-box;" />
+        </div>
+        <button class="btn" id="btn-approve-session" style="white-space: nowrap;">Countersign Session</button>
+      </div>
+      <div id="approval-status" style="font-size: 0.8rem; min-height: 20px;"></div>
+      <div id="pending-sessions-list" style="margin-top: 10px;"></div>
+    </div>
+
+    <!-- Live Telemetry Feed -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">📡 Live Agent Telemetry Feed</div>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <span id="ws-status" style="font-size: 0.75rem; color: var(--text-muted);">● DISCONNECTED</span>
+          <button class="btn btn-secondary" style="font-size: 0.75rem; padding: 4px 10px;" id="btn-connect-ws">Connect WS</button>
+          <button class="btn btn-secondary" style="font-size: 0.75rem; padding: 4px 10px;" id="btn-disconnect-ws">Disconnect</button>
+        </div>
+      </div>
+      <div id="telemetry-feed" style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-secondary); background: #080d14; border-radius: 6px; padding: 12px; height: 160px; overflow-y: auto; border: 1px solid var(--border-subtle);">
+        <div style="color: var(--text-muted);">[ Waiting for agent connection... ]</div>
+      </div>
+    </div>
+
     <!-- Cryptographic Audit Ledger -->
     <div class="card">
       <div class="card-header">

@@ -54,6 +54,18 @@ type ForensicSession struct {
 	CompiledIR         string        `json:"compiled_ir,omitempty"`
 	CreatedAt          time.Time     `json:"created_at"`
 	CompletedAt        *time.Time    `json:"completed_at,omitempty"`
+	// Multi-officer approval fields
+	CreatedByOfficer   string        `json:"created_by_officer"`
+	ApprovedByOfficer  string        `json:"approved_by_officer,omitempty"`
+	ApprovedAt         *time.Time    `json:"approved_at,omitempty"`
+	PendingApproval    bool          `json:"pending_approval"`
+}
+
+type SessionApproval struct {
+	SessionID string `json:"session_id" binding:"required"`
+	OfficerID string `json:"officer_id" binding:"required"`
+	// Optional notes for audit ledger
+	Notes     string `json:"notes"`
 }
 
 type EvidenceRecord struct {
