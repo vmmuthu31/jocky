@@ -54,12 +54,7 @@ mod tests {
     use super::*;
     use crate::ast::EncryptionAlgo;
 
-    fn with_dev_key<T, F: FnOnce() -> T>(f: F) -> T {
-        std::env::set_var("JOCKY_ALLOW_DEV_KEY", "1");
-        let r = f();
-        std::env::remove_var("JOCKY_ALLOW_DEV_KEY");
-        r
-    }
+    use crate::test_util::with_dev_key;
 
     #[test]
     fn test_aes256_encrypt_produces_output() {

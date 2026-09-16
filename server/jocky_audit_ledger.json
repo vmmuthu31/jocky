@@ -351,5 +351,239 @@
     "prev_block_hash": "e9237999528f1497f936265ee3e0a5eede665770b5be14726a814e8d78b99fe8",
     "block_hash": "f26cffa9375a5847633e682a026de1501f645c4fa852c7190ed1cadf32a930d1",
     "timestamp": "2026-09-16T18:53:25.850138+05:30"
+  },
+  {
+    "index": 23,
+    "session_id": "a96933aa-3466-4987-85d5-098c31793998",
+    "warrant_id": "NTRO-2026-CYBER-0421",
+    "event_type": "SESSION_CREATED",
+    "officer_id": "OFFICER-007",
+    "details": {
+      "agent_id": "agent-win-01",
+      "pending_approval": true,
+      "target_ip": "192.168.1.100",
+      "target_os": "windows"
+    },
+    "prev_block_hash": "f26cffa9375a5847633e682a026de1501f645c4fa852c7190ed1cadf32a930d1",
+    "block_hash": "dacba9a01d7d16db1f6d18d19368c71d26fd010ea2cc448518d599bfeff81c67",
+    "timestamp": "2026-09-16T19:32:35.757379+05:30"
+  },
+  {
+    "index": 24,
+    "session_id": "0120b0cf-1b0f-4b7c-bc11-bf40fc21b8f0",
+    "warrant_id": "NTRO-2026-CYBER-0421",
+    "event_type": "SESSION_CREATED",
+    "officer_id": "OFFICER-X",
+    "details": {
+      "agent_id": "agent-test",
+      "pending_approval": true,
+      "target_ip": "10.0.0.1",
+      "target_os": "windows"
+    },
+    "prev_block_hash": "dacba9a01d7d16db1f6d18d19368c71d26fd010ea2cc448518d599bfeff81c67",
+    "block_hash": "4d102706f28ed4c88116e31e7982602a230fa4e3f377a7a53c588b37eadc1223",
+    "timestamp": "2026-09-16T19:32:35.777677+05:30"
+  },
+  {
+    "index": 25,
+    "session_id": "0120b0cf-1b0f-4b7c-bc11-bf40fc21b8f0",
+    "warrant_id": "NTRO-2026-CYBER-0421",
+    "event_type": "SESSION_APPROVED",
+    "officer_id": "OFFICER-Y",
+    "details": {
+      "approving_officer": "OFFICER-Y",
+      "creating_officer": "OFFICER-X"
+    },
+    "prev_block_hash": "4d102706f28ed4c88116e31e7982602a230fa4e3f377a7a53c588b37eadc1223",
+    "block_hash": "bc7e817e5a1c70fc7ca48ae4f1b8d06042c64bb31435329c43268ae07db1e614",
+    "timestamp": "2026-09-16T19:32:35.777859+05:30"
+  },
+  {
+    "index": 26,
+    "session_id": "d07b4c0a-05c8-4757-a548-f4b4c89a335e",
+    "warrant_id": "NTRO-2026-CYBER-0421",
+    "event_type": "SESSION_CREATED",
+    "officer_id": "OFFICER-P",
+    "details": {
+      "agent_id": "agent-test",
+      "pending_approval": true,
+      "target_ip": "10.0.0.1",
+      "target_os": "windows"
+    },
+    "prev_block_hash": "bc7e817e5a1c70fc7ca48ae4f1b8d06042c64bb31435329c43268ae07db1e614",
+    "block_hash": "78cb3012636ea066f4f4ab30238acbac1df1fac4630a6797bfc99eeee545b3d6",
+    "timestamp": "2026-09-16T19:32:35.793649+05:30"
+  },
+  {
+    "index": 27,
+    "session_id": "c97d43cc-9d1f-4c20-b903-42ed0d35fc97",
+    "warrant_id": "NTRO-2026-CYBER-0421",
+    "event_type": "SESSION_CREATED",
+    "officer_id": "OFFICER-C1",
+    "details": {
+      "agent_id": "agent-test",
+      "pending_approval": true,
+      "target_ip": "10.0.0.1",
+      "target_os": "windows"
+    },
+    "prev_block_hash": "78cb3012636ea066f4f4ab30238acbac1df1fac4630a6797bfc99eeee545b3d6",
+    "block_hash": "d4a85010c11f868fd59b6f33092a239bdad817b7f82e57b3ab2cb3d5796bd6d4",
+    "timestamp": "2026-09-16T19:32:35.800738+05:30"
+  },
+  {
+    "index": 28,
+    "session_id": "854a2c45-81ec-47e8-8dc2-805b88aaef05",
+    "warrant_id": "NTRO-2026-LINUX-0089",
+    "event_type": "SESSION_CREATED",
+    "officer_id": "OFFICER-VK-902",
+    "details": {
+      "agent_id": "agent-lx-01",
+      "pending_approval": true,
+      "target_ip": "10.0.5.42",
+      "target_os": "linux"
+    },
+    "prev_block_hash": "d4a85010c11f868fd59b6f33092a239bdad817b7f82e57b3ab2cb3d5796bd6d4",
+    "block_hash": "dcd8c133184200c860c3f51501718bf1633a04651ab3f13594f1910fc289f3b8",
+    "timestamp": "2026-09-16T19:38:41.530184+05:30"
+  },
+  {
+    "index": 29,
+    "session_id": "c279ce33-a457-4c2b-a821-ad71eeafa3e6",
+    "warrant_id": "NTRO-2026-CYBER-0421",
+    "event_type": "SESSION_CREATED",
+    "officer_id": "OFFICER-007",
+    "details": {
+      "agent_id": "agent-win-01",
+      "pending_approval": true,
+      "target_ip": "192.168.1.100",
+      "target_os": "windows"
+    },
+    "prev_block_hash": "dcd8c133184200c860c3f51501718bf1633a04651ab3f13594f1910fc289f3b8",
+    "block_hash": "bf1cd01e7860c46b30d5be840132b4e4361715e4f152e3a1a2fbd118469c6287",
+    "timestamp": "2026-09-16T19:49:04.050227+05:30"
+  },
+  {
+    "index": 30,
+    "session_id": "8c5984b4-9370-4f78-aca3-b8b863a2ed1e",
+    "warrant_id": "NTRO-2026-CYBER-0421",
+    "event_type": "SESSION_CREATED",
+    "officer_id": "OFFICER-X",
+    "details": {
+      "agent_id": "agent-test",
+      "pending_approval": true,
+      "target_ip": "10.0.0.1",
+      "target_os": "windows"
+    },
+    "prev_block_hash": "bf1cd01e7860c46b30d5be840132b4e4361715e4f152e3a1a2fbd118469c6287",
+    "block_hash": "96f63ea251b0ee407cf0b98b991d45c844b5abab824e8e4008a1c1065f6cf1a8",
+    "timestamp": "2026-09-16T19:49:04.063042+05:30"
+  },
+  {
+    "index": 31,
+    "session_id": "8c5984b4-9370-4f78-aca3-b8b863a2ed1e",
+    "warrant_id": "NTRO-2026-CYBER-0421",
+    "event_type": "SESSION_APPROVED",
+    "officer_id": "OFFICER-Y",
+    "details": {
+      "approving_officer": "OFFICER-Y",
+      "creating_officer": "OFFICER-X"
+    },
+    "prev_block_hash": "96f63ea251b0ee407cf0b98b991d45c844b5abab824e8e4008a1c1065f6cf1a8",
+    "block_hash": "bfd79fa559613715ec60b85eafe755adfa804a0f074c77574d5115837c4c485d",
+    "timestamp": "2026-09-16T19:49:04.063126+05:30"
+  },
+  {
+    "index": 32,
+    "session_id": "0feca166-bab8-4fe3-a999-d037b61dfb0b",
+    "warrant_id": "NTRO-2026-CYBER-0421",
+    "event_type": "SESSION_CREATED",
+    "officer_id": "OFFICER-P",
+    "details": {
+      "agent_id": "agent-test",
+      "pending_approval": true,
+      "target_ip": "10.0.0.1",
+      "target_os": "windows"
+    },
+    "prev_block_hash": "bfd79fa559613715ec60b85eafe755adfa804a0f074c77574d5115837c4c485d",
+    "block_hash": "085f83b420a797c62a6cf2c668856636081e8ba032f63e7ea78f09953197895d",
+    "timestamp": "2026-09-16T19:49:04.074215+05:30"
+  },
+  {
+    "index": 33,
+    "session_id": "ac7d2950-2df2-4006-871a-7ad6f3cfded5",
+    "warrant_id": "NTRO-2026-CYBER-0421",
+    "event_type": "SESSION_CREATED",
+    "officer_id": "OFFICER-C1",
+    "details": {
+      "agent_id": "agent-test",
+      "pending_approval": true,
+      "target_ip": "10.0.0.1",
+      "target_os": "windows"
+    },
+    "prev_block_hash": "085f83b420a797c62a6cf2c668856636081e8ba032f63e7ea78f09953197895d",
+    "block_hash": "7257c99cdfc5009577741e9bf8a24f7feec0908398aa850894c20e822e44f481",
+    "timestamp": "2026-09-16T19:49:04.079743+05:30"
+  },
+  {
+    "index": 34,
+    "session_id": "cf26ba3e-c0de-4cfd-89c7-3a26e9ee1a7c",
+    "warrant_id": "NTRO-2026-CYBER-0421",
+    "event_type": "SESSION_CREATED",
+    "officer_id": "OFFICER-007",
+    "details": {
+      "agent_id": "agent-win-01",
+      "pending_approval": true,
+      "target_ip": "192.168.1.100",
+      "target_os": "windows"
+    },
+    "prev_block_hash": "7257c99cdfc5009577741e9bf8a24f7feec0908398aa850894c20e822e44f481",
+    "block_hash": "797d14e06b5cea8eed4de640279b85328f0bd45786b130029f083a495e932208",
+    "timestamp": "2026-09-16T19:56:44.608111+05:30"
+  },
+  {
+    "index": 35,
+    "session_id": "5e75c9b0-8e3e-4af0-b5f4-4f489c57555f",
+    "warrant_id": "NTRO-2026-CYBER-0421",
+    "event_type": "SESSION_CREATED",
+    "officer_id": "OFFICER-X",
+    "details": {
+      "agent_id": "agent-test",
+      "pending_approval": true,
+      "target_ip": "10.0.0.1",
+      "target_os": "windows"
+    },
+    "prev_block_hash": "797d14e06b5cea8eed4de640279b85328f0bd45786b130029f083a495e932208",
+    "block_hash": "63e776976455fe6f3fc9abb54ee1eff59a3a17941ae51cb553480eb80175f00a",
+    "timestamp": "2026-09-16T19:56:44.625244+05:30"
+  },
+  {
+    "index": 36,
+    "session_id": "5e75c9b0-8e3e-4af0-b5f4-4f489c57555f",
+    "warrant_id": "NTRO-2026-CYBER-0421",
+    "event_type": "SESSION_APPROVED",
+    "officer_id": "OFFICER-Y",
+    "details": {
+      "approving_officer": "OFFICER-Y",
+      "creating_officer": "OFFICER-X"
+    },
+    "prev_block_hash": "63e776976455fe6f3fc9abb54ee1eff59a3a17941ae51cb553480eb80175f00a",
+    "block_hash": "616f914f411dea3bd41cc6437a7c3e93a1c1290f9810006278383afa3ac74ad2",
+    "timestamp": "2026-09-16T19:56:44.62545+05:30"
+  },
+  {
+    "index": 37,
+    "session_id": "c17188c5-988e-41c1-b696-3d0903a0499b",
+    "warrant_id": "NTRO-2026-CYBER-0421",
+    "event_type": "SESSION_CREATED",
+    "officer_id": "OFFICER-P",
+    "details": {
+      "agent_id": "agent-test",
+      "pending_approval": true,
+      "target_ip": "10.0.0.1",
+      "target_os": "windows"
+    },
+    "prev_block_hash": "616f914f411dea3bd41cc6437a7c3e93a1c1290f9810006278383afa3ac74ad2",
+    "block_hash": "52a6c0854edb88b30f48c0e506a73458fbca941f63df62c470cf855390cc4bac",
+    "timestamp": "2026-09-16T19:56:44.639431+05:30"
   }
 ]

@@ -378,6 +378,47 @@ function disconnectWS() {
 
 // ---- Polling (auto-refresh every 5s) ----------------------------------------
 
+// ── Domain Fronting ─────────────────────────────────────────────────────────
+async function configureDomainFront() {
+  const statusEl = document.getElementById('front-status');
+  const resultEl = document.getElementById('front-result');
+  const sessionId = document.getElementById('front-session-id').value.trim();
+  if (!sessionId) {
+    statusEl.innerHTML = '<span style="color:#f87171;">✗ Enter a session ID first (copy from Dispatch output)</span>';
+    return;
+  }
+  statusEl.innerHTML = '<span style="color:var(--text-muted);">Configuring covert route…</span>';
+  resultEl.style.display = 'none';
+  try {
+    const res = await fetch(`${API_BASE}/sessions/${sessionId}/domain-front`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        enabled:      document.getElementById('front-enabled').checked,
+        front_domain: document.getElementById('front-domain').value.trim(),
+        real_host:    document.getElementById('front-real-host').value.trim(),
+        backend_url:  document.getElementById('front-backend-url').value.trim(),
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) { statusEl.innerHTML = `<span style="color:#f87171;">✗ ${data.error}</span>`; return; }
+    statusEl.innerHTML = '<span style="color:#8b5cf6;">✓ Covert route configured — agent will dial via CDN front</span>';
+    resultEl.style.display = 'block';
+    resultEl.textContent = [
+      `Dial URL   : ${data.dial_url}`,
+      `Host Header: ${data.host_header}`,
+      `SNI        : ${document.getElementById('front-domain').value.trim()}`,
+      `Enabled    : ${data.enabled}`,
+      '',
+      'Extra headers sent by agent:',
+      JSON.stringify(data.extra_headers, null, 2),
+    ].join('\n');
+    fetchAuditLedger();
+  } catch (e) {
+    statusEl.innerHTML = `<span style="color:#f87171;">✗ ${e.message}</span>`;
+  }
+}
+
 setInterval(() => {
   fetchAuditLedger();
   fetchPendingSessions();
@@ -394,6 +435,7 @@ document.getElementById('btn-refresh-agents').addEventListener('click', fetchAud
 document.getElementById('btn-approve-session').addEventListener('click', approveSession);
 document.getElementById('btn-connect-ws').addEventListener('click', connectWS);
 document.getElementById('btn-disconnect-ws').addEventListener('click', disconnectWS);
+document.getElementById('btn-configure-front').addEventListener('click', configureDomainFront);
 
 loadTemplates();
 fetchAuditLedger();

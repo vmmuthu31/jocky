@@ -270,16 +270,47 @@ forensic session {
                             }
                         }
                         jocky_compiler::ast::ArtifactType::Network => {
-                            println!("  • [network]: Ingested active socket telemetry (0 anomalous foreign sockets)");
+                            // Try /proc/net/tcp on Linux; fall back gracefully elsewhere
+                            let net_path = "/proc/net/tcp";
+                            match std::fs::read_to_string(net_path) {
+                                Ok(data) => {
+                                    let count = data.lines().count().saturating_sub(1);
+                                    println!("  • [network]: {} active TCP socket entries from {}", count, net_path);
+                                }
+                                Err(_) => {
+                                    println!("  • [network]: unavailable on this host — agent must run on Linux target to enumerate live sockets");
+                                }
+                            }
                         }
                         jocky_compiler::ast::ArtifactType::Auditd => {
-                            println!("  • [auditd]: Ingested syscall audit stream (execve, open, connect)");
+                            let audit_log = "/var/log/audit/audit.log";
+                            match std::fs::metadata(audit_log) {
+                                Ok(m) => println!("  • [auditd]: audit.log present ({} bytes) — agent will stream execve/connect events", m.len()),
+                                Err(_) => println!("  • [auditd]: unavailable on this host — agent must run on Linux target with auditd enabled"),
+                            }
                         }
                         jocky_compiler::ast::ArtifactType::Registry => {
-                            println!("  • [registry]: Queried Run keys and UserAssist persistence hives");
+                            // Try to parse a hive if JOCKY_TEST_HIVE is set; otherwise honest message
+                            match std::env::var("JOCKY_TEST_HIVE") {
+                                Ok(path) => match RegistryParser::parse_hive(&path) {
+                                    Ok(keys) => println!("  • [registry]: {} registry records from test hive '{}'", keys.len(), path),
+                                    Err(e)   => println!("  • [registry]: parse error on '{}': {}", path, e),
+                                },
+                                Err(_) => println!("  • [registry]: unavailable on this host — set JOCKY_TEST_HIVE=<path> to test locally, or deploy agent to Windows target"),
+                            }
                         }
                         jocky_compiler::ast::ArtifactType::Disk => {
-                            println!("  • [disk]: Scanned NTFS MFT record table / ext4 journal structures");
+                            match std::env::var("JOCKY_TEST_MFT") {
+                                Ok(path) => match MFTParser::parse_mft(&path) {
+                                    Ok(entries) => {
+                                        let deleted = MFTParser::extract_deleted_files(&path)
+                                            .map(|d| d.len()).unwrap_or(0);
+                                        println!("  • [disk/MFT]: {} FILE records ({} deleted) from test image '{}'", entries.len(), deleted, path);
+                                    }
+                                    Err(e) => println!("  • [disk/MFT]: parse error on '{}': {}", path, e),
+                                },
+                                Err(_) => println!("  • [disk/MFT]: unavailable on this host — set JOCKY_TEST_MFT=<path> to test locally, or deploy agent to Windows/Linux target"),
+                            }
                         }
                         _ => {
                             println!("  • [{:?}]: Ingested artifact directive", item.artifact_type);

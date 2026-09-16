@@ -77,12 +77,7 @@ impl HsmKeyStore {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    fn with_dev_key<F: FnOnce()>(f: F) {
-        std::env::set_var("JOCKY_ALLOW_DEV_KEY", "1");
-        f();
-        std::env::remove_var("JOCKY_ALLOW_DEV_KEY");
-    }
+    use crate::test_util::{with_dev_key, with_prod_key};
 
     #[test]
     fn test_derive_produces_32_bytes() {
@@ -122,9 +117,9 @@ mod tests {
 
     #[test]
     fn test_env_key_reported_as_hsm_derived() {
-        std::env::set_var("JOCKY_HSM_MASTER_KEY", "test-production-key-32bytes!!!!");
-        let k = HsmKeyStore::derive_key("aes256", "NTRO-2026-CYBER-0421");
-        assert_eq!(k.source, KeySource::HsmDerived);
-        std::env::remove_var("JOCKY_HSM_MASTER_KEY");
+        with_prod_key("test-production-key-32bytes!!!!", || {
+            let k = HsmKeyStore::derive_key("aes256", "NTRO-2026-CYBER-0421");
+            assert_eq!(k.source, KeySource::HsmDerived);
+        });
     }
 }

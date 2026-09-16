@@ -52,33 +52,39 @@ impl ChaCha20Cipher {
 mod tests {
     use super::*;
     use crate::crypto::hsm::HsmKeyStore;
-
-    fn test_key() -> [u8; 32] {
-        HsmKeyStore::derive_key("chacha20", "NTRO-2026-LINUX-0089").bytes
-    }
+    use crate::test_util::with_dev_key;
 
     #[test]
     fn test_roundtrip() {
-        let cipher = ChaCha20Cipher::new(&test_key());
-        let pt = b"eBPF telemetry - 256 process events";
-        let enc = cipher.encrypt(pt).unwrap();
-        let dec = cipher.decrypt(&enc).unwrap();
-        assert_eq!(dec.as_slice(), pt);
+        with_dev_key(|| {
+            let key = HsmKeyStore::derive_key("chacha20", "NTRO-2026-LINUX-0089").bytes;
+            let cipher = ChaCha20Cipher::new(&key);
+            let pt = b"eBPF telemetry - 256 process events";
+            let enc = cipher.encrypt(pt).unwrap();
+            let dec = cipher.decrypt(&enc).unwrap();
+            assert_eq!(dec.as_slice(), pt);
+        });
     }
 
     #[test]
     fn test_tampered_fails() {
-        let cipher = ChaCha20Cipher::new(&test_key());
-        let mut enc = cipher.encrypt(b"secret").unwrap();
-        enc[12] ^= 0x01;
-        assert!(cipher.decrypt(&enc).is_err());
+        with_dev_key(|| {
+            let key = HsmKeyStore::derive_key("chacha20", "NTRO-2026-LINUX-0089").bytes;
+            let cipher = ChaCha20Cipher::new(&key);
+            let mut enc = cipher.encrypt(b"secret").unwrap();
+            enc[12] ^= 0x01;
+            assert!(cipher.decrypt(&enc).is_err());
+        });
     }
 
     #[test]
     fn test_random_nonces() {
-        let cipher = ChaCha20Cipher::new(&test_key());
-        let c1 = cipher.encrypt(b"x").unwrap();
-        let c2 = cipher.encrypt(b"x").unwrap();
-        assert_ne!(c1[..12], c2[..12], "nonces must differ per encryption");
+        with_dev_key(|| {
+            let key = HsmKeyStore::derive_key("chacha20", "NTRO-2026-LINUX-0089").bytes;
+            let cipher = ChaCha20Cipher::new(&key);
+            let c1 = cipher.encrypt(b"x").unwrap();
+            let c2 = cipher.encrypt(b"x").unwrap();
+            assert_ne!(c1[..12], c2[..12], "nonces must differ per encryption");
+        });
     }
 }

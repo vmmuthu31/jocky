@@ -155,6 +155,40 @@
       <div id="pending-sessions-list" style="margin-top: 10px;"></div>
     </div>
 
+    <!-- Domain Fronting / CDN Routing -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">🌐 Domain Fronting — CDN Covert Transport</div>
+        <span class="brand-badge">SNI Masking</span>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+        <div>
+          <label style="display:block; font-size:0.75rem; color:var(--text-muted); margin-bottom:4px;">Session ID</label>
+          <input type="text" id="front-session-id" placeholder="session UUID from Dispatch" style="width:100%; box-sizing:border-box;">
+        </div>
+        <div>
+          <label style="display:block; font-size:0.75rem; color:var(--text-muted); margin-bottom:4px;">CDN Front Domain (SNI)</label>
+          <input type="text" id="front-domain" placeholder="cloudflare.com" style="width:100%; box-sizing:border-box;" value="cloudflare.com">
+        </div>
+        <div>
+          <label style="display:block; font-size:0.75rem; color:var(--text-muted); margin-bottom:4px;">Real Host (HTTP Host header)</label>
+          <input type="text" id="front-real-host" placeholder="forensics-gw.ntro.gov.in" style="width:100%; box-sizing:border-box;" value="forensics-gw.ntro.gov.in">
+        </div>
+        <div>
+          <label style="display:block; font-size:0.75rem; color:var(--text-muted); margin-bottom:4px;">Backend WSS URL</label>
+          <input type="text" id="front-backend-url" placeholder="wss://forensics-gw.ntro.gov.in/telemetry" style="width:100%; box-sizing:border-box;" value="wss://forensics-gw.ntro.gov.in/telemetry">
+        </div>
+      </div>
+      <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px;">
+        <label style="font-size:0.8rem; color:var(--text-secondary); cursor:pointer;">
+          <input type="checkbox" id="front-enabled" checked style="margin-right:6px;">Enable Fronting
+        </label>
+        <button class="btn" id="btn-configure-front" style="background:rgba(139,92,246,0.15); border:1px solid #8b5cf6; color:#8b5cf6; font-size:0.8rem; padding:5px 14px;">Configure Covert Route</button>
+      </div>
+      <div id="front-status" style="font-size:0.8rem; min-height:20px;"></div>
+      <div id="front-result" style="display:none; font-family:var(--font-mono); font-size:0.75rem; background:#080d14; border:1px solid var(--border-subtle); border-radius:6px; padding:10px; margin-top:8px; color:var(--text-secondary); white-space:pre-wrap;"></div>
+    </div>
+
     <!-- Live Telemetry Feed -->
     <div class="card">
       <div class="card-header">

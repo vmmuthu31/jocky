@@ -55,45 +55,52 @@ impl AesGcmCipher {
 mod tests {
     use super::*;
     use crate::crypto::hsm::HsmKeyStore;
-
-    fn test_key() -> [u8; 32] {
-        HsmKeyStore::derive_key("aes256", "NTRO-2026-CYBER-0421").bytes
-    }
+    use crate::test_util::with_dev_key;
 
     #[test]
     fn test_roundtrip() {
-        let cipher = AesGcmCipher::new(&test_key());
-        let plaintext = b"NTRO forensic payload - classified";
-        let enc = cipher.encrypt(plaintext).unwrap();
-        let dec = cipher.decrypt(&enc).unwrap();
-        assert_eq!(dec.as_slice(), plaintext);
+        with_dev_key(|| {
+            let key = HsmKeyStore::derive_key("aes256", "NTRO-2026-CYBER-0421").bytes;
+            let cipher = AesGcmCipher::new(&key);
+            let plaintext = b"NTRO forensic payload - classified";
+            let enc = cipher.encrypt(plaintext).unwrap();
+            let dec = cipher.decrypt(&enc).unwrap();
+            assert_eq!(dec.as_slice(), plaintext);
+        });
     }
 
     #[test]
     fn test_different_encryptions_produce_different_ciphertexts() {
-        let cipher = AesGcmCipher::new(&test_key());
-        let pt = b"same plaintext";
-        let c1 = cipher.encrypt(pt).unwrap();
-        let c2 = cipher.encrypt(pt).unwrap();
-        // Nonces are random so ciphertexts must differ
-        assert_ne!(c1, c2);
+        with_dev_key(|| {
+            let key = HsmKeyStore::derive_key("aes256", "NTRO-2026-CYBER-0421").bytes;
+            let cipher = AesGcmCipher::new(&key);
+            let pt = b"same plaintext";
+            let c1 = cipher.encrypt(pt).unwrap();
+            let c2 = cipher.encrypt(pt).unwrap();
+            assert_ne!(c1, c2);
+        });
     }
 
     #[test]
     fn test_tampered_ciphertext_fails() {
-        let cipher = AesGcmCipher::new(&test_key());
-        let mut enc = cipher.encrypt(b"secret").unwrap();
-        *enc.last_mut().unwrap() ^= 0xff; // flip last byte of GCM tag
-        assert!(cipher.decrypt(&enc).is_err(), "tampered ciphertext must fail");
+        with_dev_key(|| {
+            let key = HsmKeyStore::derive_key("aes256", "NTRO-2026-CYBER-0421").bytes;
+            let cipher = AesGcmCipher::new(&key);
+            let mut enc = cipher.encrypt(b"secret").unwrap();
+            *enc.last_mut().unwrap() ^= 0xff;
+            assert!(cipher.decrypt(&enc).is_err(), "tampered ciphertext must fail");
+        });
     }
 
     #[test]
     fn test_wrong_key_fails() {
-        let key1 = HsmKeyStore::derive_key("aes256", "NTRO-2026-CYBER-0421").bytes;
-        let key2 = HsmKeyStore::derive_key("aes256", "NTRO-2026-LINUX-0089").bytes;
-        let c1 = AesGcmCipher::new(&key1);
-        let c2 = AesGcmCipher::new(&key2);
-        let enc = c1.encrypt(b"secret").unwrap();
-        assert!(c2.decrypt(&enc).is_err(), "wrong key must fail");
+        with_dev_key(|| {
+            let key1 = HsmKeyStore::derive_key("aes256", "NTRO-2026-CYBER-0421").bytes;
+            let key2 = HsmKeyStore::derive_key("aes256", "NTRO-2026-LINUX-0089").bytes;
+            let c1 = AesGcmCipher::new(&key1);
+            let c2 = AesGcmCipher::new(&key2);
+            let enc = c1.encrypt(b"secret").unwrap();
+            assert!(c2.decrypt(&enc).is_err(), "wrong key must fail");
+        });
     }
 }
