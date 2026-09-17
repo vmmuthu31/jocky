@@ -1,6 +1,7 @@
 use clap::{Parser as ClapParser, Subcommand};
 use jocky_compiler::codegen::{CodeGenerator, TargetOS};
 use jocky_compiler::forensics::{AuditdParser, EventLogParser, MFTParser, ProcParser, RegistryParser};
+use jocky_compiler::obfuscator::PolyBuilder;
 use jocky_compiler::parser::Parser;
 use jocky_compiler::validator::Validator;
 use std::path::PathBuf;
@@ -98,9 +99,27 @@ fn main() -> anyhow::Result<()> {
 
             let mut codegen = CodeGenerator::new("forensic_main", target_os)?;
             codegen.codegen_program(&program, target_os)?;
-            codegen.emit_ir(output.to_str().unwrap())?;
 
-            println!("✓ Compiled {} → {}", input.display(), output.display());
+            // Run the 7-pass polymorphic obfuscation pipeline on the raw IR.
+            // Each build gets unique hashes, entry points, and import tables.
+            let build_seed: u64 = std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .map(|d| d.as_nanos() as u64)
+                .unwrap_or(0xDEADBEEF_CAFEBABE);
+            let build_id = format!("jocky-{:016x}", build_seed);
+            let mut poly = PolyBuilder::new(build_seed, &build_id);
+            let raw_ir = codegen.ir_text();
+            let (obfuscated_ir, report) = poly.obfuscate(&raw_ir)
+                .map_err(|e| anyhow::anyhow!("Obfuscation pipeline failed: {}", e))?;
+
+            std::fs::write(output.to_str().unwrap(), &obfuscated_ir)
+                .map_err(|e| anyhow::anyhow!("Failed to write IR to '{}': {}", output.display(), e))?;
+
+            println!("✓ Compiled  {} → {}", input.display(), output.display());
+            println!("  build-id  : {}", build_id);
+            println!("  digest    : {}", report.build_digest);
+            println!("  junk-blks : {}", report.junk_blocks);
+            println!("  apis-masked: {}", report.apis_masked);
         }
 
         Commands::Parse { input } => {

@@ -1,0 +1,64 @@
+{
+  "Forensic Session (Linux)": {
+    "prefix": "fsession-linux",
+    "body": [
+      "forensic session {",
+      "    target: \"${1:10.0.0.1}\";",
+      "    warrant: \"${2:NTRO-2026-LINUX-0001}\";",
+      "    collect {",
+      "        proc: all_processes,",
+      "        auditd: execve | connect,",
+      "        network: active_sockets,",
+      "        ext4: journal_inspection",
+      "    };",
+      "    encrypt ${3|chacha20,aes256,ml_kem|}(key: hsm_derived);",
+      "    transmit via: \"${4:wss://forensics-gw.ntro.gov.in/telemetry}\";",
+      "}"
+    ],
+    "description": "Full Linux forensic session with eBPF + auditd collection"
+  },
+  "Forensic Session (Windows)": {
+    "prefix": "fsession-windows",
+    "body": [
+      "forensic session {",
+      "    target: \"${1:192.168.1.50}\";",
+      "    warrant: \"${2:NTRO-2026-CYBER-0001}\";",
+      "    collect {",
+      "        registry: HKLM\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Run,",
+      "        memory: process \"${3:lsass.exe}\",",
+      "        disk: mft_scan",
+      "    };",
+      "    encrypt ${4|aes256,chacha20,ml_kem|}(key: hsm_derived);",
+      "    transmit via: \"${5:wss://forensics-gw.ntro.gov.in/telemetry}\";",
+      "}"
+    ],
+    "description": "Full Windows forensic session with registry + MFT collection"
+  },
+  "Triage Profile": {
+    "prefix": "fsession-triage",
+    "body": [
+      "forensic session {",
+      "    target: \"${1:10.0.0.1}\";",
+      "    warrant: \"${2:NTRO-2026-TRIAGE-0001}\";",
+      "    profile: triage;",
+      "}"
+    ],
+    "description": "Minimal triage session using built-in triage profile"
+  },
+  "Post-Quantum Session": {
+    "prefix": "fsession-pqc",
+    "body": [
+      "forensic session {",
+      "    target: \"${1:10.0.0.1}\";",
+      "    warrant: \"${2:NTRO-2026-INFIL-0001}\";",
+      "    collect {",
+      "        proc: all_processes,",
+      "        network: active_sockets",
+      "    };",
+      "    encrypt ml_kem(key: hsm_derived);",
+      "    transmit via: \"${3:wss://forensics-gw.ntro.gov.in/telemetry}\";",
+      "}"
+    ],
+    "description": "Session using ML-KEM-768 post-quantum encryption (FIPS 203)"
+  }
+}

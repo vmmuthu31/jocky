@@ -1,0 +1,236 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  # ── Tests (run on all platforms before building) ─────────────────────────────
+  test:
+    name: Test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Rust tests
+        working-directory: compiler
+        run: cargo test
+        env:
+          JOCKY_ALLOW_DEV_KEY: "1"
+      - name: Go tests
+        working-directory: server
+        run: go test ./...
+
+  # ── Binary builds (one job per target) ───────────────────────────────────────
+  build:
+    name: Build ${{ matrix.artifact }}
+    needs: test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+            artifact: jocky-linux-x86_64
+          - target: aarch64-unknown-linux-gnu
+            os: ubuntu-latest
+            artifact: jocky-linux-arm64
+            cross: true
+          - target: x86_64-pc-windows-msvc
+            os: windows-latest
+            artifact: jocky-windows-x86_64.exe
+          - target: x86_64-apple-darwin
+            os: macos-13
+            artifact: jocky-macos-x86_64
+          - target: aarch64-apple-darwin
+            os: macos-latest
+            artifact: jocky-macos-arm64
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Install cross (ARM Linux)
+        if: matrix.cross
+        run: cargo install cross --git https://github.com/cross-rs/cross
+
+      - name: Build (native)
+        if: '!matrix.cross'
+        working-directory: compiler
+        run: cargo build --release --target ${{ matrix.target }}
+
+      - name: Build (cross)
+        if: matrix.cross
+        working-directory: compiler
+        run: cross build --release --target ${{ matrix.target }}
+
+      - name: Stage binary (Unix)
+        if: runner.os != 'Windows'
+        run: cp compiler/target/${{ matrix.target }}/release/jocky-compile ${{ matrix.artifact }}
+
+      - name: Stage binary (Windows)
+        if: runner.os == 'Windows'
+        run: cp compiler/target/${{ matrix.target }}/release/jocky-compile.exe ${{ matrix.artifact }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: ${{ matrix.artifact }}
+
+  # ── Debian .deb package ───────────────────────────────────────────────────────
+  package-deb:
+    name: Package .deb
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install cargo-deb
+        run: cargo install cargo-deb
+      - name: Build .deb
+        working-directory: compiler
+        run: |
+          cargo build --release
+          cargo deb --no-build --output ../dist/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: jocky-deb
+          path: dist/*.deb
+
+  # ── RPM package ───────────────────────────────────────────────────────────────
+  package-rpm:
+    name: Package .rpm
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install rpmbuild + cargo-generate-rpm
+        run: |
+          sudo apt-get install -y rpm
+          cargo install cargo-generate-rpm
+      - name: Build binary + RPM
+        working-directory: compiler
+        run: |
+          cargo build --release
+          cargo generate-rpm --output ../dist/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: jocky-rpm
+          path: dist/*.rpm
+
+  # ── Windows NSIS installer .exe ───────────────────────────────────────────────
+  package-windows-installer:
+    name: Package Windows .exe installer
+    needs: build
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-msvc
+      - name: Build Windows binary
+        working-directory: compiler
+        run: cargo build --release --target x86_64-pc-windows-msvc
+      - name: Install NSIS
+        run: choco install nsis -y
+      - name: Build installer
+        run: |
+          & "C:\Program Files (x86)\NSIS\makensis.exe" packaging\windows\jocky-installer.nsi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: jocky-windows-installer
+          path: packaging/windows/jocky-setup-*.exe
+
+  # ── GitHub Release ────────────────────────────────────────────────────────────
+  release:
+    name: Create GitHub Release
+    needs: [build, package-deb, package-rpm, package-windows-installer]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist/
+          merge-multiple: true
+
+      - name: Show dist contents
+        run: ls -la dist/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          generate_release_notes: true
+          body: |
+            ## JOCKY ${{ github.ref_name }}
+
+            Enterprise Digital Forensics Platform — NTRO Hackathon 26148
+
+            ---
+
+            ### Install
+
+            **macOS / Linux (one line)**
+            ```bash
+            curl -fsSL https://raw.githubusercontent.com/vmmuthu31/jocky/main/install.sh | sh
+            ```
+
+            **Homebrew (macOS / Linux)**
+            ```bash
+            brew tap vmmuthu31/jocky
+            brew install jocky
+            ```
+
+            **Windows (PowerShell)**
+            ```powershell
+            irm https://raw.githubusercontent.com/vmmuthu31/jocky/main/install.ps1 | iex
+            ```
+
+            **Windows (installer .exe)**
+            Download `jocky-setup-${{ github.ref_name }}-x86_64.exe` below and run it.
+
+            **Debian / Ubuntu**
+            ```bash
+            wget https://github.com/vmmuthu31/jocky/releases/download/${{ github.ref_name }}/jocky_*.deb
+            sudo dpkg -i jocky_*.deb
+            ```
+
+            **RHEL / Fedora / CentOS**
+            ```bash
+            sudo rpm -i https://github.com/vmmuthu31/jocky/releases/download/${{ github.ref_name }}/jocky-*.rpm
+            ```
+
+            ---
+
+            ### Downloads
+
+            | Platform | Package | File |
+            |----------|---------|------|
+            | macOS Apple Silicon | Binary | `jocky-macos-arm64` |
+            | macOS Intel | Binary | `jocky-macos-x86_64` |
+            | Linux x86_64 | Binary | `jocky-linux-x86_64` |
+            | Linux ARM64 | Binary | `jocky-linux-arm64` |
+            | Debian / Ubuntu | `.deb` | `jocky_*.deb` |
+            | RHEL / Fedora | `.rpm` | `jocky-*.rpm` |
+            | Windows x86_64 | Installer `.exe` | `jocky-setup-*.exe` |
+            | Windows x86_64 | Raw binary | `jocky-windows-x86_64.exe` |
+
+            ---
+
+            **Docs:** [Getting Started](https://github.com/vmmuthu31/jocky/blob/main/docs/getting-started.md) · [CLI Reference](https://github.com/vmmuthu31/jocky/blob/main/docs/cli-reference.md)

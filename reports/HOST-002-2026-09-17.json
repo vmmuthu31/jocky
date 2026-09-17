@@ -1,12 +1,21 @@
 {
   "host": "HOST-002",
   "os": "Ubuntu",
+<<<<<<< HEAD
   "scan_id": "JCK-2026-529",
   "timestamp": "2026-09-17T08:00:00Z",
   "evidence_count": 1308,
   "processes_count": 0,
   "services_count": 6,
   "users_count": 5,
+=======
+  "scan_id": "JCK-2026-688",
+  "timestamp": "2026-09-17T08:00:00Z",
+  "evidence_count": 1435,
+  "processes_count": 0,
+  "services_count": 6,
+  "users_count": 132,
+>>>>>>> 67642ad1953f9980b83f9c94b4256902ad7fbecc
   "sockets_count": 7,
   "persistence_count": 6,
   "files_count": 24821,
@@ -22,6 +31,7 @@
       "mitre_attck_id": "T1543.002"
     },
     {
+<<<<<<< HEAD
       "id": "IND-USER-guest_backdoor",
       "title": "Non-Root Account Granted Root UID 0 ('guest_backdoor')",
       "severity": "CRITICAL",
@@ -31,6 +41,8 @@
       "mitre_attck_id": "T1136.001"
     },
     {
+=======
+>>>>>>> 67642ad1953f9980b83f9c94b4256902ad7fbecc
       "id": "IND-PERS-WindowsUpdateUpdater",
       "title": "Suspicious Scheduled Persistence Hook (WindowsUpdateUpdater)",
       "severity": "HIGH",
@@ -104,13 +116,24 @@
     }
   ],
   "indicator_summary": {
+<<<<<<< HEAD
     "total": 10,
     "critical": 4,
+=======
+    "total": 9,
+    "critical": 3,
+>>>>>>> 67642ad1953f9980b83f9c94b4256902ad7fbecc
     "high": 3,
     "medium": 1,
     "low": 2
   },
+<<<<<<< HEAD
   "evidence_sha256": "9b4b1a3d5f7ea1011a3d8398c24ec4e1cc987e0d833d305e39f7012c6987fac6",
   "json_report_path": "../reports\\HOST-002-2026-09-17.json",
   "html_report_path": "../reports\\HOST-002-2026-09-17.html"
+=======
+  "evidence_sha256": "240b439df55f8da60997b83650a7744d0f193aac325d5688329f1a04f901bf90",
+  "json_report_path": "../reports/HOST-002-2026-09-17.json",
+  "html_report_path": "../reports/HOST-002-2026-09-17.html"
+>>>>>>> 67642ad1953f9980b83f9c94b4256902ad7fbecc
 }
