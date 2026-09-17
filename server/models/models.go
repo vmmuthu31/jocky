@@ -110,3 +110,58 @@ type DomainFrontRef struct {
 	RealHost    string `json:"real_host"`
 	Enabled     bool   `json:"enabled"`
 }
+
+type ForensicHost struct {
+	Host       string `json:"host"`
+	OS         string `json:"os"`
+	Status     string `json:"status"`
+	Findings   int    `json:"findings"`
+	IPAddress  string `json:"ip_address"`
+	LastScanID string `json:"last_scan_id"`
+}
+
+type ScanRequest struct {
+	Host      string `json:"host" binding:"required"`
+	OS        string `json:"os"`
+	Script    string `json:"script"`
+	ScanID    string `json:"scan_id"`
+	OfficerID string `json:"officer_id"`
+}
+
+type SuspiciousItem struct {
+	ID           string `json:"id"`
+	Title        string `json:"title"`
+	Severity     string `json:"severity"`
+	Category     string `json:"category"`
+	Description  string `json:"description"`
+	Evidence     string `json:"evidence"`
+	MitreAttckID string `json:"mitre_attck_id"`
+}
+
+type ScanResponse struct {
+	Host            string           `json:"host"`
+	OS              string           `json:"os"`
+	ScanID          string           `json:"scan_id"`
+	EvidenceCount   int              `json:"evidence_count"`
+	SuspiciousCount int              `json:"suspicious_count"`
+	CriticalCount   int              `json:"critical_count"`
+	HighCount       int              `json:"high_count"`
+	MediumCount     int              `json:"medium_count"`
+	LowCount        int              `json:"low_count"`
+	JSONReportPath  string           `json:"json_report_path"`
+	HTMLReportPath  string           `json:"html_report_path"`
+	HTMLReportURL   string           `json:"html_report_url"`
+	EvidenceSHA256  string           `json:"evidence_sha256"`
+	Indicators      []SuspiciousItem `json:"indicators"`
+}
+
+type ForensicReportMeta struct {
+	Host           string    `json:"host"`
+	ScanID         string    `json:"scan_id"`
+	Timestamp      time.Time `json:"timestamp"`
+	EvidenceCount  int       `json:"evidence_count"`
+	FindingsCount  int       `json:"findings_count"`
+	HTMLReportURL  string    `json:"html_report_url"`
+	JSONReportPath string    `json:"json_report_path"`
+}
+
