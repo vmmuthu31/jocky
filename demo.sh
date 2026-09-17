@@ -39,8 +39,9 @@ echo "[2/4] Compiler dry-run smoke test…"
 JOCKY_ALLOW_DEV_KEY=1 "$COMPILER_BIN" run \
   --target linux \
   --dry-run \
-  "$ROOT/examples/triage.jocky" 2>&1 | sed 's/^/  /'
-echo "  ✓ Dry-run complete"
+  "$ROOT/examples/forensic_investigation.jocky" 2>&1 | sed 's/^/  /'
+echo "  ✓ Smoke test complete"
+
 
 # ── Step 3: Start Go server ───────────────────────────────────────────────────
 echo ""
