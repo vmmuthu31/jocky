@@ -889,5 +889,323 @@
     "prev_block_hash": "2da9ebb06f2e32234e301e4c487c6d7a3251ffedaf43006c1c5002a3164b2e27",
     "block_hash": "37588975f7d3bc6e854c18c8fc08a487438e2dd968601303b0bd273807ebb7bb",
     "timestamp": "2026-09-17T10:30:25.9797061+05:30"
+  },
+  {
+    "index": 57,
+    "session_id": "HOST-001",
+    "warrant_id": "JCK-2026-110",
+    "event_type": "FORENSIC_SCAN_COMPLETED",
+    "officer_id": "OFFICER-VK-902",
+    "details": {
+      "evidence_count": 1313,
+      "evidence_sha256": "2a0319c7322d1509cb09dc30242790b26977e83f71b570eef6611ab5e9e10eaa",
+      "findings_count": 13,
+      "html_report": "/reports/HOST-001-2026-09-17.html",
+      "scan_id": "JCK-2026-110"
+    },
+    "prev_block_hash": "37588975f7d3bc6e854c18c8fc08a487438e2dd968601303b0bd273807ebb7bb",
+    "block_hash": "d9dbce3e3a43ddaf7b3d5cb8ebbffb3be363dc6375c406e0213d78f4555ced92",
+    "timestamp": "2026-09-17T10:45:10.1075745+05:30"
+  },
+  {
+    "index": 58,
+    "session_id": "HOST-003",
+    "warrant_id": "JCK-2026-899",
+    "event_type": "FORENSIC_SCAN_COMPLETED",
+    "officer_id": "OFFICER-VK-902",
+    "details": {
+      "evidence_count": 1313,
+      "evidence_sha256": "679d249333be5ffc2e4c2fe37665be98bba06f166c736f73c67aeb4e751ce194",
+      "findings_count": 13,
+      "html_report": "/reports/HOST-003-2026-09-17.html",
+      "scan_id": "JCK-2026-899"
+    },
+    "prev_block_hash": "d9dbce3e3a43ddaf7b3d5cb8ebbffb3be363dc6375c406e0213d78f4555ced92",
+    "block_hash": "22b9267e562ee6a700bee0a03d1787142b9e675c32e049bfa47dad03f27926b2",
+    "timestamp": "2026-09-17T10:58:19.2145402+05:30"
+  },
+  {
+    "index": 59,
+    "session_id": "c2a7d678-8a71-4acb-8e49-65d4326f84c6",
+    "warrant_id": "NTRO-2026-LINUX-0089",
+    "event_type": "SESSION_CREATED",
+    "officer_id": "OFFICER-VK-902",
+    "details": {
+      "agent_id": "agent-lx-01",
+      "pending_approval": true,
+      "target_ip": "10.0.5.42",
+      "target_os": "linux"
+    },
+    "prev_block_hash": "22b9267e562ee6a700bee0a03d1787142b9e675c32e049bfa47dad03f27926b2",
+    "block_hash": "3eba38e0c2488740ba3d77e4adf7989430671d12a8689d1ab6c988371d634fdf",
+    "timestamp": "2026-09-17T10:59:57.6996038+05:30"
+  },
+  {
+    "index": 60,
+    "session_id": "3c84b138-3ed8-460b-b544-23ecef1913a7",
+    "warrant_id": "NTRO-2026-LINUX-0089",
+    "event_type": "SESSION_CREATED",
+    "officer_id": "OFFICER-VK-902",
+    "details": {
+      "agent_id": "agent-lx-01",
+      "pending_approval": true,
+      "target_ip": "10.0.5.42",
+      "target_os": "linux"
+    },
+    "prev_block_hash": "3eba38e0c2488740ba3d77e4adf7989430671d12a8689d1ab6c988371d634fdf",
+    "block_hash": "7cd60231dc879313b8adcf98cd00bead4285711249f2237623dee56c791d79ae",
+    "timestamp": "2026-09-17T10:59:59.418521+05:30"
+  },
+  {
+    "index": 61,
+    "session_id": "91cd19a6-49df-4423-a240-b47fa6e0a423",
+    "warrant_id": "NTRO-2026-LINUX-0089",
+    "event_type": "SESSION_CREATED",
+    "officer_id": "OFFICER-VK-902",
+    "details": {
+      "agent_id": "agent-lx-01",
+      "pending_approval": true,
+      "target_ip": "10.0.5.42",
+      "target_os": "linux"
+    },
+    "prev_block_hash": "7cd60231dc879313b8adcf98cd00bead4285711249f2237623dee56c791d79ae",
+    "block_hash": "a23b22027b7d3ae2e32690cb28bdbf680ad3c3379009381080d184e54f2e7dcf",
+    "timestamp": "2026-09-17T11:00:00.2486064+05:30"
+  },
+  {
+    "index": 62,
+    "session_id": "3ef0eaa4-1523-46b2-acc8-0dc511ff15c4",
+    "warrant_id": "NTRO-2026-LINUX-0089",
+    "event_type": "SESSION_CREATED",
+    "officer_id": "OFFICER-VK-902",
+    "details": {
+      "agent_id": "agent-lx-01",
+      "pending_approval": true,
+      "target_ip": "10.0.5.42",
+      "target_os": "linux"
+    },
+    "prev_block_hash": "a23b22027b7d3ae2e32690cb28bdbf680ad3c3379009381080d184e54f2e7dcf",
+    "block_hash": "ede154cc227d1d229383564c248812a507d2bb6fef41aed570644f16eac60941",
+    "timestamp": "2026-09-17T11:00:00.920319+05:30"
+  },
+  {
+    "index": 63,
+    "session_id": "HOST-002",
+    "warrant_id": "JCK-2026-529",
+    "event_type": "FORENSIC_SCAN_COMPLETED",
+    "officer_id": "OFFICER-VK-902",
+    "details": {
+      "evidence_count": 1308,
+      "evidence_sha256": "9b4b1a3d5f7ea1011a3d8398c24ec4e1cc987e0d833d305e39f7012c6987fac6",
+      "findings_count": 10,
+      "html_report": "/reports/HOST-002-2026-09-17.html",
+      "scan_id": "JCK-2026-529"
+    },
+    "prev_block_hash": "ede154cc227d1d229383564c248812a507d2bb6fef41aed570644f16eac60941",
+    "block_hash": "6b7293b3320dde657f60caa19500ec6ea4a95dc1461db2789613f347351d844d",
+    "timestamp": "2026-09-17T11:08:49.7662395+05:30"
+  },
+  {
+    "index": 64,
+    "session_id": "HOST-001",
+    "warrant_id": "JCK-2026-991",
+    "event_type": "FORENSIC_SCAN_COMPLETED",
+    "officer_id": "OFFICER-VK-902",
+    "details": {
+      "evidence_count": 1313,
+      "evidence_sha256": "11639c5cb9d402ba3d292e15b767de9fc241f7ca4155280eb8bcbce66f9135ad",
+      "findings_count": 13,
+      "html_report": "/reports/HOST-001-2026-09-17.html",
+      "scan_id": "JCK-2026-991"
+    },
+    "prev_block_hash": "6b7293b3320dde657f60caa19500ec6ea4a95dc1461db2789613f347351d844d",
+    "block_hash": "c2006b4237c6da7866dfbd17189d1f4f08e6dff7647b188854ac1c26e36835d4",
+    "timestamp": "2026-09-17T11:16:31.4746501+05:30"
+  },
+  {
+    "index": 65,
+    "session_id": "HOST-001",
+    "warrant_id": "JCK-2026-992",
+    "event_type": "FORENSIC_SCAN_COMPLETED",
+    "officer_id": "OFFICER-VK-902",
+    "details": {
+      "evidence_count": 1313,
+      "evidence_sha256": "8faa0163a69e72a3b40f13c5c5f4d5dda340c55bb4756ea8a7022be063020e2a",
+      "findings_count": 13,
+      "html_report": "/reports/HOST-001-2026-09-17.html",
+      "scan_id": "JCK-2026-992"
+    },
+    "prev_block_hash": "c2006b4237c6da7866dfbd17189d1f4f08e6dff7647b188854ac1c26e36835d4",
+    "block_hash": "527ff438f7d195a416942c4d89b5ac17bd7bf9b41551fbf69cebd8b3e354e9ef",
+    "timestamp": "2026-09-17T11:16:32.3631872+05:30"
+  },
+  {
+    "index": 66,
+    "session_id": "fe0b6d8f-53d7-4a34-88ad-b3ea715ad035",
+    "warrant_id": "NTRO-2026-CYBER-0421",
+    "event_type": "SESSION_CREATED",
+    "officer_id": "OFFICER-VK-902",
+    "details": {
+      "agent_id": "agent-win-02",
+      "pending_approval": true,
+      "target_ip": "192.168.1.105",
+      "target_os": "windows"
+    },
+    "prev_block_hash": "527ff438f7d195a416942c4d89b5ac17bd7bf9b41551fbf69cebd8b3e354e9ef",
+    "block_hash": "676f1e0398543a8bc35d1ac60c9dba98183b35899463557f07853d477c88c717",
+    "timestamp": "2026-09-17T11:16:34.0011281+05:30"
+  },
+  {
+    "index": 67,
+    "session_id": "HOST-001",
+    "warrant_id": "JCK-2026-011",
+    "event_type": "FORENSIC_SCAN_COMPLETED",
+    "officer_id": "OFFICER-VK-902",
+    "details": {
+      "evidence_count": 1313,
+      "evidence_sha256": "a5210ea1128b247d3239e3b40c3f2c6c8d2a0078a6ec9aed6cd1a0bf25f1acaf",
+      "findings_count": 13,
+      "html_report": "/reports/HOST-001-2026-09-17.html",
+      "scan_id": "JCK-2026-011"
+    },
+    "prev_block_hash": "676f1e0398543a8bc35d1ac60c9dba98183b35899463557f07853d477c88c717",
+    "block_hash": "2da1eca5a07eed0e40776399ca6531b5e1da3c4cce06ff2373465f71ed687751",
+    "timestamp": "2026-09-17T11:33:31.7538382+05:30"
+  },
+  {
+    "index": 68,
+    "session_id": "HOST-001",
+    "warrant_id": "JCK-2026-051",
+    "event_type": "FORENSIC_SCAN_COMPLETED",
+    "officer_id": "OFFICER-VK-902",
+    "details": {
+      "evidence_count": 1313,
+      "evidence_sha256": "2d6319451d99e457cfbe6dd2baf6aa8b0d12b73af033f1e540b86fec5a4ed099",
+      "findings_count": 13,
+      "html_report": "/reports/HOST-001-2026-09-17.html",
+      "scan_id": "JCK-2026-051"
+    },
+    "prev_block_hash": "2da1eca5a07eed0e40776399ca6531b5e1da3c4cce06ff2373465f71ed687751",
+    "block_hash": "d46be1c878440e902f54385264645346263369bf4932649a30ac04e18700425c",
+    "timestamp": "2026-09-17T11:34:11.2871831+05:30"
+  },
+  {
+    "index": 69,
+    "session_id": "HOST-001",
+    "warrant_id": "JCK-2026-786",
+    "event_type": "FORENSIC_SCAN_COMPLETED",
+    "officer_id": "OFFICER-VK-902",
+    "details": {
+      "evidence_count": 1313,
+      "evidence_sha256": "686216a49be87b5d02806255566b8780b558de1617b8c93693c0595036082082",
+      "findings_count": 13,
+      "html_report": "/reports/HOST-001-2026-09-17.html",
+      "scan_id": "JCK-2026-786"
+    },
+    "prev_block_hash": "d46be1c878440e902f54385264645346263369bf4932649a30ac04e18700425c",
+    "block_hash": "59119d478c0df392b415c81e0f815ed30b6dcd4c335ae48e757ecb4cd755816c",
+    "timestamp": "2026-09-17T11:46:26.3902746+05:30"
+  },
+  {
+    "index": 70,
+    "session_id": "HOST-001",
+    "warrant_id": "JCK-2026-080",
+    "event_type": "FORENSIC_SCAN_COMPLETED",
+    "officer_id": "OFFICER-VK-902",
+    "details": {
+      "evidence_count": 1313,
+      "evidence_sha256": "a9fd4521c342acf588a5e91756c202790fd8d4e686d76674325aa3920eec35b0",
+      "findings_count": 13,
+      "html_report": "/reports/HOST-001-2026-09-17.html",
+      "scan_id": "JCK-2026-080"
+    },
+    "prev_block_hash": "59119d478c0df392b415c81e0f815ed30b6dcd4c335ae48e757ecb4cd755816c",
+    "block_hash": "0dea027a44bafb6f14610a8399165fc584d614f736ab38d03a969b3b1fb7614f",
+    "timestamp": "2026-09-17T11:51:21.0376694+05:30"
+  },
+  {
+    "index": 71,
+    "session_id": "HOST-001",
+    "warrant_id": "JCK-2026-758",
+    "event_type": "FORENSIC_SCAN_COMPLETED",
+    "officer_id": "OFFICER-VK-902",
+    "details": {
+      "evidence_count": 1313,
+      "evidence_sha256": "42776aeb194fe72c8363921c977f510ec2d51fabb48ce604d1388963f39b90c8",
+      "findings_count": 13,
+      "html_report": "/reports/HOST-001-2026-09-17.html",
+      "scan_id": "JCK-2026-758"
+    },
+    "prev_block_hash": "0dea027a44bafb6f14610a8399165fc584d614f736ab38d03a969b3b1fb7614f",
+    "block_hash": "0d705e8e0ea47bdc00e019763de2130f235763bf4d00ad63724b569e7aa451d1",
+    "timestamp": "2026-09-17T12:02:38.3373812+05:30"
+  },
+  {
+    "index": 72,
+    "session_id": "HOST-001",
+    "warrant_id": "JCK-2026-759",
+    "event_type": "FORENSIC_SCAN_COMPLETED",
+    "officer_id": "OFFICER-VK-902",
+    "details": {
+      "evidence_count": 1313,
+      "evidence_sha256": "8d995c8658250f1b0516ecf65745096587021b810b9f2f98e44b4b617764916f",
+      "findings_count": 13,
+      "html_report": "/reports/HOST-001-2026-09-17.html",
+      "scan_id": "JCK-2026-759"
+    },
+    "prev_block_hash": "0d705e8e0ea47bdc00e019763de2130f235763bf4d00ad63724b569e7aa451d1",
+    "block_hash": "640e2f1cff6a0b33c33d1a29b42f98a99c48222472c2895103f932fc9da0fdb7",
+    "timestamp": "2026-09-17T12:02:39.0517259+05:30"
+  },
+  {
+    "index": 73,
+    "session_id": "HOST-001",
+    "warrant_id": "JCK-2026-759",
+    "event_type": "FORENSIC_SCAN_COMPLETED",
+    "officer_id": "OFFICER-VK-902",
+    "details": {
+      "evidence_count": 1313,
+      "evidence_sha256": "8d995c8658250f1b0516ecf65745096587021b810b9f2f98e44b4b617764916f",
+      "findings_count": 13,
+      "html_report": "/reports/HOST-001-2026-09-17.html",
+      "scan_id": "JCK-2026-759"
+    },
+    "prev_block_hash": "640e2f1cff6a0b33c33d1a29b42f98a99c48222472c2895103f932fc9da0fdb7",
+    "block_hash": "77ff548440e9396f741b9fa8cc041b7ca00da5744c889c4c64529d46b168de36",
+    "timestamp": "2026-09-17T12:02:39.2742681+05:30"
+  },
+  {
+    "index": 74,
+    "session_id": "HOST-001",
+    "warrant_id": "JCK-2026-778",
+    "event_type": "FORENSIC_SCAN_COMPLETED",
+    "officer_id": "OFFICER-VK-902",
+    "details": {
+      "evidence_count": 1313,
+      "evidence_sha256": "26edc0608f3136ea2809091c954da6cd03ce299f7411220d8a5a3f04d75a305b",
+      "findings_count": 13,
+      "html_report": "/reports/HOST-001-2026-09-17.html",
+      "scan_id": "JCK-2026-778"
+    },
+    "prev_block_hash": "77ff548440e9396f741b9fa8cc041b7ca00da5744c889c4c64529d46b168de36",
+    "block_hash": "30956e997243d6c77c3a0adedd98f02b99acd6bd91604cfaad093743ef271b61",
+    "timestamp": "2026-09-17T12:02:59.0540566+05:30"
+  },
+  {
+    "index": 75,
+    "session_id": "HOST-001",
+    "warrant_id": "JCK-2026-840",
+    "event_type": "FORENSIC_SCAN_COMPLETED",
+    "officer_id": "OFFICER-VK-902",
+    "details": {
+      "evidence_count": 1313,
+      "evidence_sha256": "efbbe5b8f63def04c92a11d9c43ada8d5ca4a1fd6e58c2510b49c83157a7d44a",
+      "findings_count": 13,
+      "html_report": "/reports/HOST-001-2026-09-17.html",
+      "scan_id": "JCK-2026-840"
+    },
+    "prev_block_hash": "30956e997243d6c77c3a0adedd98f02b99acd6bd91604cfaad093743ef271b61",
+    "block_hash": "d1cedf16200995542f7f9b8a38776f33f54cb62b086ba939b2c841d4ba8af9f9",
+    "timestamp": "2026-09-17T12:04:00.5275623+05:30"
   }
 ]
