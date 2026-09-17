@@ -45,7 +45,8 @@ echo "  ✓ Smoke test complete"
 
 # ── Step 3: Start Go server ───────────────────────────────────────────────────
 echo ""
-echo "[3/4] Starting JOCKY server on port $PORT…"
+echo "[3/4] Starting JOCKY server on port ${PORT}..."
+
 SERVER_PID=""
 cleanup() {
   if [ -n "$SERVER_PID" ] && kill -0 "$SERVER_PID" 2>/dev/null; then
