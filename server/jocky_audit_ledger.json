@@ -771,5 +771,22 @@
     "prev_block_hash": "474217b71186f974a60f6a3ff13f3abdb5f043d84e619e7e3050163a49c67574",
     "block_hash": "c0372ed51885c1055dcf0c7e6f0bc5d52bbe42fc8d24acb214c360f38e528566",
     "timestamp": "2026-09-17T08:40:23.699048+05:30"
+  },
+  {
+    "index": 50,
+    "session_id": "HOST-002",
+    "warrant_id": "JCK-2026-688",
+    "event_type": "FORENSIC_SCAN_COMPLETED",
+    "officer_id": "SYSTEM_AUTOMATION",
+    "details": {
+      "evidence_count": 1435,
+      "evidence_sha256": "240b439df55f8da60997b83650a7744d0f193aac325d5688329f1a04f901bf90",
+      "findings_count": 9,
+      "html_report": "/reports/HOST-002-2026-09-17.html",
+      "scan_id": "JCK-2026-688"
+    },
+    "prev_block_hash": "c0372ed51885c1055dcf0c7e6f0bc5d52bbe42fc8d24acb214c360f38e528566",
+    "block_hash": "adc9e7c48c893fcb10fe8d3722044c6fe5b43e0d2fbd2bab10b59eb6d42472de",
+    "timestamp": "2026-09-17T08:41:28.63322+05:30"
   }
 ]
