@@ -2,8 +2,13 @@ $schema: https://api.gitbook.com/gitbook-docs.yaml
 site:
   title: JOCKY — Enterprise Digital Forensics Platform
   structure:
-    - type: space
-      key: jocky-docs
-      title: JOCKY Documentation
-      content:
-        directory: ./
+    - type: section
+      key: jocky-section
+      title: Documentation
+      children:
+        - type: space
+          key: jocky-docs
+          title: JOCKY Documentation
+          default: true
+          content:
+            directory: ./
