@@ -1,0 +1,12 @@
+Package: jocky
+Version: 1.0.0
+Section: utils
+Priority: optional
+Architecture: amd64
+Maintainer: NTRO JOCKY Team <vmmuthu20000@gmail.com>
+Description: JOCKY Enterprise Digital Forensics Platform
+ JOCKY is a forensic DSL compiler and command-and-control platform
+ for authorized computer and network forensic analysis under the
+ IT Act 2000 Section 69. It compiles .jocky scripts to polymorphic
+ LLVM IR and supports Windows/Linux field agents.
+Homepage: https://github.com/vmmuthu31/jocky

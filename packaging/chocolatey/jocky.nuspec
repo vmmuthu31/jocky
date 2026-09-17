@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+  <metadata>
+    <id>jocky</id>
+    <version>1.0.0</version>
+    <title>JOCKY — Digital Forensics Platform</title>
+    <authors>NTRO Hackathon 26148</authors>
+    <projectUrl>https://github.com/vmmuthu31/jocky</projectUrl>
+    <licenseUrl>https://github.com/vmmuthu31/jocky/blob/main/LICENSE</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>
+      JOCKY is an enterprise-grade digital forensics platform.
+      Compiles .jocky DSL scripts to polymorphic LLVM IR with a 7-pass
+      obfuscation pipeline. Supports Windows/Linux agents, domain-fronting
+      CDN transport, and blockchain audit ledger (IT Act §65B).
+    </description>
+    <tags>forensics security llvm ntro admin</tags>
+    <dependencies />
+  </metadata>
+  <files>
+    <file src="tools\**" target="tools" />
+  </files>
+</package>

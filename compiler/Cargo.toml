@@ -1,7 +1,28 @@
 [package]
 name = "jocky-compiler"
-version = "0.1.0"
+version = "1.0.0"
 edition = "2021"
+description = "JOCKY Enterprise Digital Forensics Platform — DSL compiler"
+homepage = "https://github.com/vmmuthu31/jocky"
+repository = "https://github.com/vmmuthu31/jocky"
+license = "MIT"
+
+[package.metadata.deb]
+name = "jocky"
+maintainer = "NTRO JOCKY Team <vmmuthu20000@gmail.com>"
+copyright = "2026 NTRO Hackathon 26148"
+license-file = ["../LICENSE", "0"]
+extended-description = """\
+JOCKY is an enterprise-grade digital forensics platform for authorized \
+computer and network forensic analysis under IT Act 2000 Section 69.\
+"""
+section = "utils"
+priority = "optional"
+assets = [
+  ["target/release/jocky-compile", "usr/bin/", "755"],
+  ["../README.md", "usr/share/doc/jocky/", "644"],
+  ["../examples/", "usr/share/jocky/examples/", "644"],
+]
 
 [[bin]]
 name = "jocky-compile"
