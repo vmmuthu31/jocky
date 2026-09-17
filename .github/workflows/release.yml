@@ -56,7 +56,7 @@ jobs:
             os: windows-latest
             artifact: jocky-windows-x86_64.exe
           - target: x86_64-apple-darwin
-            os: macos-13
+            os: macos-latest
             artifact: jocky-macos-x86_64
           - target: aarch64-apple-darwin
             os: macos-latest
