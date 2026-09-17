@@ -35,6 +35,7 @@ jobs:
         run: go test ./...
         env:
           CGO_ENABLED: "0"
+          JOCKY_COMPILER_PATH: ${{ runner.os == 'Windows' && '../compiler/target/debug/jocky-compile.exe' || '../compiler/target/debug/jocky-compile' }}
 
   # ── Binary builds (one job per target) ───────────────────────────────────────
   build:
