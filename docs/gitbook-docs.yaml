@@ -1,5 +1,9 @@
+$schema: https://api.gitbook.com/gitbook-docs.yaml
 site:
   title: JOCKY — Enterprise Digital Forensics Platform
   structure:
-    readme: README.md
-    summary: SUMMARY.md
+    - type: space
+      key: jocky-docs
+      title: JOCKY Documentation
+      content:
+        directory: ./

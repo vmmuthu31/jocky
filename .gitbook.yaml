@@ -1,5 +1,5 @@
-site:
-  title: JOCKY — Enterprise Digital Forensics Platform
-  structure:
-    readme: docs/README.md
-    summary: docs/SUMMARY.md
+root: ./
+
+structure:
+  readme: README.md
+  summary: SUMMARY.md
