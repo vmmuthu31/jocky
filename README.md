@@ -10,14 +10,34 @@ JOCKY is an enterprise-grade digital forensics command-and-control platform buil
 
 ## Install
 
-**macOS / Linux**
+**Homebrew (macOS / Linux)**
 ```bash
-curl -fsSL https://raw.githubusercontent.com/vmmuthu31/jocky/main/install.sh | sh
+brew tap vmmuthu31/jocky
+brew install jocky
 ```
 
-**Windows (PowerShell)**
+**Debian / Ubuntu**
+```bash
+wget https://github.com/vmmuthu31/jocky/releases/latest/download/jocky_amd64.deb
+sudo dpkg -i jocky_amd64.deb
+```
+
+**RHEL / Fedora / CentOS**
+```bash
+sudo rpm -i https://github.com/vmmuthu31/jocky/releases/latest/download/jocky-x86_64.rpm
+```
+
+**Windows — Installer .exe**
+Download [`jocky-setup-x86_64.exe`](https://github.com/vmmuthu31/jocky/releases/latest) from Releases and run it. Installs to `Program Files\JOCKY` and adds to system PATH.
+
+**Windows — PowerShell (no installer)**
 ```powershell
 irm https://raw.githubusercontent.com/vmmuthu31/jocky/main/install.ps1 | iex
+```
+
+**macOS / Linux — curl**
+```bash
+curl -fsSL https://raw.githubusercontent.com/vmmuthu31/jocky/main/install.sh | sh
 ```
 
 **Build from source**
@@ -25,7 +45,7 @@ irm https://raw.githubusercontent.com/vmmuthu31/jocky/main/install.ps1 | iex
 git clone https://github.com/vmmuthu31/jocky.git && cd jocky && make install
 ```
 
-→ [Full installation guide](docs/installation.md) · [Getting started](docs/getting-started.md) · [CLI reference](docs/cli-reference.md) · [Language reference](docs/language-reference.md)
+→ [Full installation guide](docs/installation.md) · [Getting started](docs/getting-started.md) · [CLI reference](docs/cli-reference.md)
 
 ---
 

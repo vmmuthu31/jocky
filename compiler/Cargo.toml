@@ -42,3 +42,14 @@ sha2 = "0.10"
 thiserror = "2.0.20"
 tree-sitter = "0.27.0"
 tree-sitter-traversal = "0.1.2"
+
+[package.metadata.generate-rpm]
+name = "jocky"
+license = "MIT"
+summary = "JOCKY Enterprise Digital Forensics Platform"
+url = "https://github.com/vmmuthu31/jocky"
+
+[[package.metadata.generate-rpm.assets]]
+source = "target/release/jocky-compile"
+dest = "/usr/bin/jocky-compile"
+mode = "755"
