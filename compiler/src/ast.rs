@@ -3,7 +3,16 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Program {
     pub sessions: Vec<ForensicSession>,
+    pub statements: Vec<MethodCall>,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct MethodCall {
+    pub module: String,
+    pub function: String,
+    pub args: Vec<String>,
+}
+
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]

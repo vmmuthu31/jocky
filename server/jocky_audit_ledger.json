@@ -585,5 +585,67 @@
     "prev_block_hash": "616f914f411dea3bd41cc6437a7c3e93a1c1290f9810006278383afa3ac74ad2",
     "block_hash": "52a6c0854edb88b30f48c0e506a73458fbca941f63df62c470cf855390cc4bac",
     "timestamp": "2026-09-16T19:56:44.639431+05:30"
+  },
+  {
+    "index": 38,
+    "session_id": "987b65c4-bff5-4111-9761-35e238ccfd15",
+    "warrant_id": "NTRO-2026-CYBER-0421",
+    "event_type": "SESSION_CREATED",
+    "officer_id": "OFFICER-007",
+    "details": {
+      "agent_id": "agent-win-01",
+      "pending_approval": true,
+      "target_ip": "192.168.1.100",
+      "target_os": "windows"
+    },
+    "prev_block_hash": "52a6c0854edb88b30f48c0e506a73458fbca941f63df62c470cf855390cc4bac",
+    "block_hash": "82e8d7b62bc558a167ccfbdc5b5d4798021c465c611d2bd847461798b3500460",
+    "timestamp": "2026-09-17T08:09:28.883085+05:30"
+  },
+  {
+    "index": 39,
+    "session_id": "7a4dfae8-aabe-42a5-ac05-ca92f4124928",
+    "warrant_id": "NTRO-2026-CYBER-0421",
+    "event_type": "SESSION_CREATED",
+    "officer_id": "OFFICER-X",
+    "details": {
+      "agent_id": "agent-test",
+      "pending_approval": true,
+      "target_ip": "10.0.0.1",
+      "target_os": "windows"
+    },
+    "prev_block_hash": "82e8d7b62bc558a167ccfbdc5b5d4798021c465c611d2bd847461798b3500460",
+    "block_hash": "b57cd99e5eb01b852703c349fe9558aa33980fca6442fde4efcff251f54e32b3",
+    "timestamp": "2026-09-17T08:09:28.897045+05:30"
+  },
+  {
+    "index": 40,
+    "session_id": "7a4dfae8-aabe-42a5-ac05-ca92f4124928",
+    "warrant_id": "NTRO-2026-CYBER-0421",
+    "event_type": "SESSION_APPROVED",
+    "officer_id": "OFFICER-Y",
+    "details": {
+      "approving_officer": "OFFICER-Y",
+      "creating_officer": "OFFICER-X"
+    },
+    "prev_block_hash": "b57cd99e5eb01b852703c349fe9558aa33980fca6442fde4efcff251f54e32b3",
+    "block_hash": "7b6c394798534abdee7ed0ec6933a7db79114726ba645aa4fdc08ed2b7df68d1",
+    "timestamp": "2026-09-17T08:09:28.897163+05:30"
+  },
+  {
+    "index": 41,
+    "session_id": "fc001e85-831b-49dc-b5f4-20179d55ad74",
+    "warrant_id": "NTRO-2026-CYBER-0421",
+    "event_type": "SESSION_CREATED",
+    "officer_id": "OFFICER-P",
+    "details": {
+      "agent_id": "agent-test",
+      "pending_approval": true,
+      "target_ip": "10.0.0.1",
+      "target_os": "windows"
+    },
+    "prev_block_hash": "7b6c394798534abdee7ed0ec6933a7db79114726ba645aa4fdc08ed2b7df68d1",
+    "block_hash": "6cadb659696aca7275d086cdcbbfd2ba977f7f40f989de28f08114cfcbaae734",
+    "timestamp": "2026-09-17T08:09:28.911751+05:30"
   }
 ]
