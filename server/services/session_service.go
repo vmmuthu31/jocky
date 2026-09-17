@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 
@@ -16,10 +17,12 @@ import (
 	"github.com/jocky-sec/jocky/server/models"
 )
 
+
 type SessionService struct {
 	mu           sync.RWMutex
 	sessions     map[string]models.ForensicSession
 	agents       map[string]models.Agent
+	hosts        map[string]models.ForensicHost
 	auditLedger  []models.AuditBlock
 	compilerPath string
 	warrantSvc   *WarrantService
@@ -46,11 +49,18 @@ func NewSessionServiceWithStore(warrantSvc *WarrantService, compilerPath string,
 	svc := &SessionService{
 		sessions:     make(map[string]models.ForensicSession),
 		agents:       make(map[string]models.Agent),
+		hosts: map[string]models.ForensicHost{
+			"HOST-001": {Host: "HOST-001", OS: "Windows", Status: "ONLINE", Findings: 12, IPAddress: "192.168.1.10", LastScanID: "JCK-2026-001"},
+			"HOST-002": {Host: "HOST-002", OS: "Ubuntu", Status: "ONLINE", Findings: 3, IPAddress: "10.0.5.42", LastScanID: "JCK-2026-002"},
+			"HOST-003": {Host: "HOST-003", OS: "Windows", Status: "SCANNING", Findings: 7, IPAddress: "192.168.1.105", LastScanID: "JCK-2026-003"},
+			"HOST-004": {Host: "HOST-004", OS: "Ubuntu", Status: "ONLINE", Findings: 0, IPAddress: "10.0.5.99", LastScanID: "JCK-2026-004"},
+		},
 		auditLedger:  []models.AuditBlock{genesisBlock},
 		compilerPath: compilerPath,
 		warrantSvc:   warrantSvc,
 		ledgerStore:  store,
 	}
+
 
 	// Try to load persisted ledger; fall back to genesis block if absent/corrupt
 	if store != nil {
@@ -418,6 +428,17 @@ forensic session {
     encrypt chacha20(key: hsm_derived);
     transmit via: "wss://telemetry-stream.ntro.gov.in/evidence";
 }`,
+		"investigation": `// JOCKY Forensic Script — Complete Endpoint Analysis
+
+system.processes()
+system.services()
+system.network_connections()
+system.users()
+system.persistence()
+
+forensic.collect_logs()
+forensic.collect_files()
+forensic.generate_report()`,
 		"pqc-vault": `// JOCKY Forensic Script — Post-Quantum Secure Vault Transmission
 forensic session {
     target: "10.100.4.12";
@@ -428,4 +449,242 @@ forensic session {
 }`,
 	}
 }
+
+func (s *SessionService) ListHosts() []models.ForensicHost {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	order := []string{"HOST-001", "HOST-002", "HOST-003", "HOST-004"}
+	var list []models.ForensicHost
+	seen := make(map[string]bool)
+
+	for _, k := range order {
+		if h, ok := s.hosts[k]; ok {
+			list = append(list, h)
+			seen[k] = true
+		}
+	}
+	for k, h := range s.hosts {
+		if !seen[k] {
+			list = append(list, h)
+		}
+	}
+	return list
+}
+
+func (s *SessionService) ExecuteHostScan(req models.ScanRequest) (*models.ScanResponse, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	compiler := s.compilerPath
+	if compiler == "" {
+		candidates := []string{
+			"../compiler/target/release/jocky-compile",
+			"../compiler/target/debug/jocky-compile",
+			"compiler/target/release/jocky-compile",
+			"compiler/target/debug/jocky-compile",
+		}
+		for _, c := range candidates {
+			if _, err := os.Stat(c); err == nil {
+				compiler = c
+				break
+			}
+		}
+	}
+	if compiler == "" {
+		return nil, errors.New("jocky-compile binary not found; please build compiler with cargo build --release")
+	}
+
+	host := req.Host
+	if host == "" {
+		host = "WORKSTATION-01"
+	}
+
+	scanID := req.ScanID
+	if scanID == "" {
+		scanID = fmt.Sprintf("JCK-%d-%03d", time.Now().Year(), time.Now().Unix()%1000)
+	}
+
+	targetOS := req.OS
+	if targetOS == "" {
+		if h, ok := s.hosts[host]; ok && h.OS != "" {
+			targetOS = h.OS
+		} else {
+			targetOS = "linux"
+		}
+	}
+
+	scriptContent := req.Script
+	if strings.TrimSpace(scriptContent) == "" {
+		scriptContent = `// JOCKY Forensic Script — Complete Endpoint Analysis
+system.processes()
+system.services()
+system.network_connections()
+system.users()
+system.persistence()
+
+forensic.collect_logs()
+forensic.collect_files()
+forensic.generate_report()`
+	}
+
+	tmpDir, err := os.MkdirTemp("", "jocky_scan_*")
+	if err != nil {
+		return nil, err
+	}
+	defer os.RemoveAll(tmpDir)
+
+	scriptFile := filepath.Join(tmpDir, "scan.jocky")
+	if err := os.WriteFile(scriptFile, []byte(scriptContent), 0600); err != nil {
+		return nil, err
+	}
+
+	reportsDir := "../reports"
+	if _, err := os.Stat(reportsDir); err != nil {
+		reportsDir = "reports"
+		_ = os.MkdirAll(reportsDir, 0755)
+	}
+
+	cmd := exec.Command(
+		compiler, "run",
+		"--target", strings.ToLower(targetOS),
+		"--host", host,
+		"--scan-id", scanID,
+		"--reports-dir", reportsDir,
+		scriptFile,
+	)
+
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return nil, fmt.Errorf("scan execution failed: %s (output: %s)", err, string(output))
+	}
+
+	dateSlug := time.Now().Format("2006-01-02")
+	expectedJSON := filepath.Join(reportsDir, fmt.Sprintf("%s-%s.json", host, dateSlug))
+	jsonBytes, err := os.ReadFile(expectedJSON)
+	if err != nil {
+		matches, _ := filepath.Glob(filepath.Join(reportsDir, fmt.Sprintf("%s-*.json", host)))
+		if len(matches) > 0 {
+			jsonBytes, err = os.ReadFile(matches[len(matches)-1])
+		}
+	}
+
+	var scanData struct {
+		Host             string                  `json:"host"`
+		OS               string                  `json:"os"`
+		ScanID           string                  `json:"scan_id"`
+		Timestamp        string                  `json:"timestamp"`
+		EvidenceCount    int                     `json:"evidence_count"`
+		ProcessesCount   int                     `json:"processes_count"`
+		ServicesCount    int                     `json:"services_count"`
+		UsersCount       int                     `json:"users_count"`
+		SocketsCount     int                     `json:"sockets_count"`
+		PersistenceCount int                     `json:"persistence_count"`
+		FilesCount       int                     `json:"files_count"`
+		LogsCount        int                     `json:"logs_count"`
+		Indicators       []models.SuspiciousItem `json:"indicators"`
+		IndicatorSummary struct {
+			Total    int `json:"total"`
+			Critical int `json:"critical"`
+			High     int `json:"high"`
+			Medium   int `json:"medium"`
+			Low      int `json:"low"`
+		} `json:"indicator_summary"`
+		EvidenceSHA256 string `json:"evidence_sha256"`
+		JSONReportPath string `json:"json_report_path"`
+		HTMLReportPath string `json:"html_report_path"`
+	}
+
+	if len(jsonBytes) > 0 {
+		_ = json.Unmarshal(jsonBytes, &scanData)
+	}
+
+	htmlURL := fmt.Sprintf("/reports/%s-%s.html", host, dateSlug)
+
+	resp := &models.ScanResponse{
+		Host:            host,
+		OS:              targetOS,
+		ScanID:          scanID,
+		EvidenceCount:   scanData.EvidenceCount,
+		SuspiciousCount: scanData.IndicatorSummary.Total,
+		CriticalCount:   scanData.IndicatorSummary.Critical,
+		HighCount:       scanData.IndicatorSummary.High,
+		MediumCount:     scanData.IndicatorSummary.Medium,
+		LowCount:        scanData.IndicatorSummary.Low,
+		JSONReportPath:  scanData.JSONReportPath,
+		HTMLReportPath:  scanData.HTMLReportPath,
+		HTMLReportURL:   htmlURL,
+		EvidenceSHA256:  scanData.EvidenceSHA256,
+		Indicators:      scanData.Indicators,
+	}
+
+	hostEntry, exists := s.hosts[host]
+	if !exists {
+		hostEntry = models.ForensicHost{Host: host, OS: targetOS, IPAddress: "10.0.5.50"}
+	}
+	hostEntry.Status = "ONLINE"
+	hostEntry.Findings = resp.SuspiciousCount
+	hostEntry.LastScanID = scanID
+	s.hosts[host] = hostEntry
+
+	officer := req.OfficerID
+	if officer == "" {
+		officer = "SYSTEM_AUTOMATION"
+	}
+	s.appendAuditBlock(host, scanID, "FORENSIC_SCAN_COMPLETED", officer, map[string]interface{}{
+		"scan_id":         scanID,
+		"evidence_count":  resp.EvidenceCount,
+		"findings_count":  resp.SuspiciousCount,
+		"evidence_sha256": resp.EvidenceSHA256,
+		"html_report":     htmlURL,
+	})
+
+	return resp, nil
+}
+
+func (s *SessionService) ListReports() ([]models.ForensicReportMeta, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	reportsDir := "../reports"
+	if _, err := os.Stat(reportsDir); err != nil {
+		reportsDir = "reports"
+	}
+
+	var results []models.ForensicReportMeta
+	files, err := filepath.Glob(filepath.Join(reportsDir, "*.json"))
+	if err != nil {
+		return results, nil
+	}
+
+	for _, f := range files {
+		data, err := os.ReadFile(f)
+		if err != nil {
+			continue
+		}
+		var parsed struct {
+			Host             string `json:"host"`
+			ScanID           string `json:"scan_id"`
+			EvidenceCount    int    `json:"evidence_count"`
+			IndicatorSummary struct {
+				Total int `json:"total"`
+			} `json:"indicator_summary"`
+		}
+		if err := json.Unmarshal(data, &parsed); err == nil {
+			base := strings.TrimSuffix(filepath.Base(f), ".json")
+			results = append(results, models.ForensicReportMeta{
+				Host:           parsed.Host,
+				ScanID:         parsed.ScanID,
+				Timestamp:      time.Now(),
+				EvidenceCount:  parsed.EvidenceCount,
+				FindingsCount:  parsed.IndicatorSummary.Total,
+				HTMLReportURL:  fmt.Sprintf("/reports/%s.html", base),
+				JSONReportPath: f,
+			})
+		}
+	}
+
+	return results, nil
+}
+
 

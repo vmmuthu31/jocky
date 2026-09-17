@@ -52,6 +52,10 @@ func SetupRouter(sessionSvc *services.SessionService, warrantSvc *services.Warra
 		v1.GET("/audit/ledger", handler.HandleGetAuditLedger)
 		v1.GET("/evidence/verify", handler.HandleVerifyEvidence)
 
+		v1.GET("/hosts", handler.HandleListHosts)
+		v1.POST("/scan/execute", handler.HandleExecuteScan)
+		v1.GET("/reports", handler.HandleListReports)
+
 		v1.GET("/templates", handler.HandleGetTemplates)
 	}
 
@@ -62,6 +66,14 @@ func SetupRouter(sessionSvc *services.SessionService, warrantSvc *services.Warra
 	r.GET("/healthz", func(c *gin.Context) {
 		c.JSON(200, gin.H{"status": "healthy", "service": "jocky-backend"})
 	})
+
+	// Serve generated forensic reports
+	reportsDir := "../reports"
+	if _, err := os.Stat(reportsDir); err != nil {
+		reportsDir = "reports"
+	}
+	_ = os.MkdirAll(reportsDir, 0755)
+	r.Static("/reports", reportsDir)
 
 	// Serve the web dashboard from ../web/ relative to cwd, or JOCKY_WEB_DIR env var.
 	// Opening index.html as file:// causes CORS errors; serve it here instead.
@@ -74,6 +86,7 @@ func SetupRouter(sessionSvc *services.SessionService, warrantSvc *services.Warra
 		r.GET("/", func(c *gin.Context) { c.Redirect(302, "/dashboard/index.html") })
 		log.Printf("Dashboard served at http://localhost:<port>/dashboard/")
 	}
+
 
 	return r
 }

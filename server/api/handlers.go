@@ -270,3 +270,37 @@ func (h *ServerHandler) HandleSubmitEvidence(c *gin.Context) {
 	})
 }
 
+// HandleListHosts — GET /api/v1/hosts
+func (h *ServerHandler) HandleListHosts(c *gin.Context) {
+	hosts := h.sessionSvc.ListHosts()
+	c.JSON(http.StatusOK, gin.H{"hosts": hosts, "count": len(hosts)})
+}
+
+// HandleExecuteScan — POST /api/v1/scan/execute
+func (h *ServerHandler) HandleExecuteScan(c *gin.Context) {
+	var req models.ScanRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	result, err := h.sessionSvc.ExecuteHostScan(req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, result)
+}
+
+// HandleListReports — GET /api/v1/reports
+func (h *ServerHandler) HandleListReports(c *gin.Context) {
+	reports, err := h.sessionSvc.ListReports()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"reports": reports, "count": len(reports)})
+}
+
+
