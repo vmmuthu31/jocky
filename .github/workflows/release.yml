@@ -30,12 +30,18 @@ jobs:
         run: cargo test
         env:
           JOCKY_ALLOW_DEV_KEY: "1"
+      - name: Set compiler path (Unix)
+        if: runner.os != 'Windows'
+        run: echo "JOCKY_COMPILER_PATH=../compiler/target/debug/jocky-compile" >> $GITHUB_ENV
+      - name: Set compiler path (Windows)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: echo "JOCKY_COMPILER_PATH=../compiler/target/debug/jocky-compile.exe" >> $GITHUB_ENV
       - name: Go tests
         working-directory: server
         run: go test ./...
         env:
           CGO_ENABLED: "0"
-          JOCKY_COMPILER_PATH: ${{ runner.os == 'Windows' && '../compiler/target/debug/jocky-compile.exe' || '../compiler/target/debug/jocky-compile' }}
 
   # ── Binary builds (one job per target) ───────────────────────────────────────
   build:
