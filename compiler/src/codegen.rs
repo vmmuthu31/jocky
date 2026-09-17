@@ -34,6 +34,10 @@ impl CodeGenerator {
             self.codegen_session(session, i)?;
         }
 
+        if !program.statements.is_empty() {
+            self.codegen_statements(&program.statements)?;
+        }
+
         let mut final_lines = Vec::new();
         let triple = match self.target_os {
             TargetOS::Windows => "x86_64-pc-windows-msvc",
@@ -49,6 +53,7 @@ impl CodeGenerator {
         final_lines.push("declare i32 @jocky_collect_artifact(i32 %type, i8* %expr)".to_string());
         final_lines.push("declare i32 @jocky_encrypt_payload(i32 %algo, i8* %key_source)".to_string());
         final_lines.push("declare i32 @jocky_transmit_secure(i8* %endpoint)".to_string());
+        final_lines.push("declare i32 @jocky_execute_forensic_fn(i8* %fn_name)".to_string());
         final_lines.push(String::new());
 
         if !self.globals.is_empty() {
@@ -63,6 +68,32 @@ impl CodeGenerator {
         self.ir_lines = final_lines;
         Ok(())
     }
+
+    fn codegen_statements(&mut self, stmts: &[MethodCall]) -> Result<()> {
+        let func_name = "jocky_forensic_script_main";
+        self.ir_lines.push("; Procedural Forensic Script Execution".to_string());
+        self.ir_lines.push(format!("define i32 @{}() {{", func_name));
+        self.ir_lines.push("entry:".to_string());
+
+        for (i, stmt) in stmts.iter().enumerate() {
+            let full_call = format!("{}.{}", stmt.module, stmt.function);
+            let (str_sym, str_len) = self.add_string_constant(&full_call);
+            self.ir_lines.push(format!(
+                "  %call_ptr_{} = getelementptr inbounds [{} x i8], [{} x i8]* {}, i64 0, i64 0",
+                i, str_len, str_len, str_sym
+            ));
+            self.ir_lines.push(format!(
+                "  %call_res_{} = call i32 @jocky_execute_forensic_fn(i8* %call_ptr_{})",
+                i, i
+            ));
+        }
+
+        self.ir_lines.push("  ret i32 0".to_string());
+        self.ir_lines.push("}".to_string());
+        self.ir_lines.push(String::new());
+        Ok(())
+    }
+
 
     fn add_string_constant(&mut self, value: &str) -> (String, usize) {
         let name = format!("@.str.{}", self.str_counter);

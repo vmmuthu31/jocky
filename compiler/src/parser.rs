@@ -50,16 +50,64 @@ impl<'a> InnerParser<'a> {
 
     fn parse_program(&mut self) -> Result<Program> {
         let mut sessions = Vec::new();
+        let mut statements = Vec::new();
         self.skip_ws_comments();
         while self.pos < self.src.len() {
-            sessions.push(self.parse_session()?);
+            if self.peek_keyword("forensic") {
+                let save = self.pos;
+                self.pos += "forensic".len();
+                self.skip_ws_comments();
+                if self.peek_char('.') {
+                    self.pos = save;
+                    statements.push(self.parse_method_call()?);
+                } else {
+                    self.pos = save;
+                    sessions.push(self.parse_session()?);
+                }
+            } else if self.peek_keyword("system") {
+                statements.push(self.parse_method_call()?);
+            } else {
+                statements.push(self.parse_method_call()?);
+            }
             self.skip_ws_comments();
         }
-        if sessions.is_empty() {
-            return Err(self.error("No forensic sessions found in source"));
+        if sessions.is_empty() && statements.is_empty() {
+            return Err(self.error("No forensic sessions or statements found in source"));
         }
-        Ok(Program { sessions })
+        Ok(Program { sessions, statements })
     }
+
+    fn parse_method_call(&mut self) -> Result<MethodCall> {
+        let module = self.read_identifier()?;
+        self.skip_ws_comments();
+        self.expect_char('.')?;
+        self.skip_ws_comments();
+        let function = self.read_identifier()?;
+        self.skip_ws_comments();
+        self.expect_char('(')?;
+        self.skip_ws_comments();
+        let mut args = Vec::new();
+        while !self.peek_char(')') && self.pos < self.src.len() {
+            if self.peek_char('"') {
+                args.push(self.parse_string()?);
+            } else {
+                let arg = self.read_identifier()?;
+                args.push(arg);
+            }
+            self.skip_ws_comments();
+            if self.peek_char(',') {
+                self.pos += 1;
+                self.skip_ws_comments();
+            }
+        }
+        self.expect_char(')')?;
+        self.skip_ws_comments();
+        if self.peek_char(';') {
+            self.pos += 1;
+        }
+        Ok(MethodCall { module, function, args })
+    }
+
 
     fn parse_session(&mut self) -> Result<ForensicSession> {
         self.expect_keyword("forensic")?;
@@ -414,3 +462,30 @@ impl<'a> InnerParser<'a> {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_procedural_script() {
+        let src = r#"
+system.processes()
+system.services()
+system.network_connections()
+system.users()
+system.persistence()
+
+forensic.collect_logs()
+forensic.collect_files()
+forensic.generate_report()
+"#;
+        let prog = Parser::parse(src).expect("Should parse procedural script");
+        assert_eq!(prog.statements.len(), 8);
+        assert_eq!(prog.statements[0].module, "system");
+        assert_eq!(prog.statements[0].function, "processes");
+        assert_eq!(prog.statements[7].module, "forensic");
+        assert_eq!(prog.statements[7].function, "generate_report");
+    }
+}
+

@@ -6,16 +6,24 @@ pub struct Validator;
 
 impl Validator {
     pub fn validate_program(program: &Program, target_os: Option<TargetOS>) -> Result<()> {
-        if program.sessions.is_empty() {
-            bail!("Forensic program must contain at least one forensic session");
+        if program.sessions.is_empty() && program.statements.is_empty() {
+            bail!("Forensic program must contain at least one forensic session or procedural statement");
         }
 
         for (index, session) in program.sessions.iter().enumerate() {
             Self::validate_session(session, index, target_os)?;
         }
 
+        for stmt in &program.statements {
+            match stmt.module.as_str() {
+                "system" | "forensic" => {}
+                other => bail!("Unknown module '{}'; expected 'system' or 'forensic'", other),
+            }
+        }
+
         Ok(())
     }
+
 
     pub fn validate_session(session: &ForensicSession, index: usize, target_os: Option<TargetOS>) -> Result<()> {
         if session.target.trim().is_empty() {
@@ -170,6 +178,7 @@ mod tests {
     fn test_valid_program() {
         let program = Program {
             sessions: vec![valid_session(false)],
+            statements: Vec::new(),
         };
         assert!(Validator::validate_program(&program, Some(TargetOS::Windows)).is_ok());
     }
@@ -180,6 +189,7 @@ mod tests {
         session.warrant = "INVALID-WARRANT".to_string();
         let program = Program {
             sessions: vec![session],
+            statements: Vec::new(),
         };
         let err = Validator::validate_program(&program, Some(TargetOS::Windows)).unwrap_err();
         assert!(err.to_string().contains("Invalid warrant ID"));
@@ -190,6 +200,7 @@ mod tests {
         let session = valid_session(false);
         let program = Program {
             sessions: vec![session],
+            statements: Vec::new(),
         };
         let err = Validator::validate_program(&program, Some(TargetOS::Linux)).unwrap_err();
         assert!(err.to_string().contains("only compatible with Windows"));
@@ -201,8 +212,10 @@ mod tests {
         session.encrypt_key = "plaintext_password".to_string();
         let program = Program {
             sessions: vec![session],
+            statements: Vec::new(),
         };
         let err = Validator::validate_program(&program, Some(TargetOS::Windows)).unwrap_err();
         assert!(err.to_string().contains("Invalid key source"));
     }
+
 }
