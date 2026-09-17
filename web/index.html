@@ -1,335 +1,364 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>JOCKY — Digital Forensics Command & Control</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JOCKY // Forensics &amp; Compliance Management</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-  <header>
-    <div class="brand">
-      <div class="brand-icon">J</div>
-      <span class="brand-title">JOCKY COMMAND CENTER</span>
-      <span class="brand-badge">NTRO-26148</span>
-    </div>
-    <div class="header-status">
-      <div class="status-indicator">
-        <span class="pulse-dot"></span>
-        <span style="color: var(--text-secondary);">DEFCON 4 • ACTIVE SURVEILLANCE</span>
-      </div>
-      <div style="font-family: var(--font-mono); color: var(--text-muted);" id="live-clock">
-        00:00:00 UTC
-      </div>
-    </div>
-  </header>
+<body class="app-shell">
 
-  <main>
-    <!-- Top Stats Row -->
-    <div class="card full-width">
-      <div class="stats-grid">
-        <div class="stat-box">
-          <div class="stat-label">Monitored Endpoints</div>
-          <div class="stat-value" id="stat-hosts" style="color: var(--accent-cyan);">4</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-label">Suspicious Indicators</div>
-          <div class="stat-value" id="stat-findings" style="color: var(--accent-rose);">22</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-label">Active Warrants (Sec 69)</div>
-          <div class="stat-value" id="stat-warrants">2</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-label">Audit Ledger Blocks</div>
-          <div class="stat-value" id="stat-blocks" style="color: var(--accent-emerald);">4</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- JOCKY FORENSIC CONSOLE -->
-    <div class="card full-width">
-      <div class="card-header">
-        <div class="card-title">🖥️ JOCKY FORENSIC CONSOLE — Central Host Fleet Management</div>
-        <div style="display: flex; gap: 8px; align-items: center;">
-          <span class="brand-badge" id="selected-host-badge">TARGET: HOST-001</span>
-          <button class="btn btn-secondary" style="font-size: 0.75rem; padding: 4px 10px;" id="btn-refresh-hosts">Refresh Fleet</button>
-        </div>
-      </div>
-      <table>
-        <thead>
-          <tr>
-            <th>Host</th>
-            <th>Operating System</th>
-            <th>Status</th>
-            <th>Findings</th>
-            <th>IP Address</th>
-            <th>Last Scan ID</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="hosts-tbody">
-          <!-- Populated dynamically via GET /api/v1/hosts -->
-          <tr class="host-row host-row-selected" data-host="HOST-001" data-os="Windows">
-            <td style="font-weight: 700; font-family: var(--font-mono); color: var(--accent-cyan);">HOST-001</td>
-            <td><span class="tag tag-windows">Windows</span></td>
-            <td><span class="tag tag-active">ONLINE</span></td>
-            <td><span class="badge-findings findings-alert">12</span></td>
-            <td style="font-family: var(--font-mono); font-size: 0.8rem;">192.168.1.10</td>
-            <td style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted);">JCK-2026-001</td>
-            <td><button class="btn-action-sm btn-row-scan" data-host="HOST-001">Scan</button></td>
-          </tr>
-          <tr class="host-row" data-host="HOST-002" data-os="Ubuntu">
-            <td style="font-weight: 700; font-family: var(--font-mono); color: var(--accent-cyan);">HOST-002</td>
-            <td><span class="tag tag-linux">Ubuntu</span></td>
-            <td><span class="tag tag-active">ONLINE</span></td>
-            <td><span class="badge-findings findings-alert">3</span></td>
-            <td style="font-family: var(--font-mono); font-size: 0.8rem;">10.0.5.42</td>
-            <td style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted);">JCK-2026-002</td>
-            <td><button class="btn-action-sm btn-row-scan" data-host="HOST-002">Scan</button></td>
-          </tr>
-          <tr class="host-row" data-host="HOST-003" data-os="Windows">
-            <td style="font-weight: 700; font-family: var(--font-mono); color: var(--accent-cyan);">HOST-003</td>
-            <td><span class="tag tag-windows">Windows</span></td>
-            <td><span class="tag tag-linux">SCANNING</span></td>
-            <td><span class="badge-findings findings-alert">7</span></td>
-            <td style="font-family: var(--font-mono); font-size: 0.8rem;">192.168.1.105</td>
-            <td style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted);">JCK-2026-003</td>
-            <td><button class="btn-action-sm btn-row-scan" data-host="HOST-003">Scan</button></td>
-          </tr>
-          <tr class="host-row" data-host="HOST-004" data-os="Ubuntu">
-            <td style="font-weight: 700; font-family: var(--font-mono); color: var(--accent-cyan);">HOST-004</td>
-            <td><span class="tag tag-linux">Ubuntu</span></td>
-            <td><span class="tag tag-active">ONLINE</span></td>
-            <td><span class="badge-findings findings-clean">0</span></td>
-            <td style="font-family: var(--font-mono); font-size: 0.8rem;">10.0.5.99</td>
-            <td style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted);">JCK-2026-004</td>
-            <td><button class="btn-action-sm btn-row-scan" data-host="HOST-004">Scan</button></td>
-          </tr>
-        </tbody>
-      </table>
-
-      <!-- Fleet Action Bar -->
-      <div style="display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap; align-items: center; border-top: 1px solid var(--border-subtle); padding-top: 14px;">
-        <button class="btn" id="btn-console-run-script">⚡ Run JOCKY Script</button>
-        <button class="btn btn-secondary" id="btn-console-collect-evidence" style="border-color: var(--accent-cyan); color: var(--accent-cyan);">📦 Collect Evidence</button>
-        <button class="btn btn-secondary" id="btn-console-generate-report" style="border-color: var(--accent-emerald); color: var(--accent-emerald);">📊 Generate Report</button>
-        <span id="console-action-msg" style="font-size: 0.82rem; color: var(--text-muted); margin-left: auto;">Targeting: <strong>HOST-001</strong></span>
-      </div>
-
-      <!-- Live Scan Terminal Modal Box -->
-      <div id="scan-terminal-container" style="display: none; margin-top: 16px;">
-        <div class="scan-console-modal">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-            <span style="color: var(--accent-cyan); font-weight: 700;">SCAN EXECUTION FEEDBACK</span>
-            <div style="display: flex; gap: 8px;">
-              <a id="btn-modal-open-html" href="#" target="_blank" class="btn" style="padding: 3px 10px; font-size: 0.72rem; text-decoration: none; display: none;">View HTML Report</a>
-              <a id="btn-modal-open-json" href="#" target="_blank" class="btn btn-secondary" style="padding: 3px 10px; font-size: 0.72rem; text-decoration: none; display: none;">Download JSON</a>
+    <!-- Top Navigation Header -->
+    <header class="top-nav">
+        <div class="nav-left">
+            <div class="brand-badge-square">J</div>
+            <div class="brand-text">
+                <span class="system-title">JOCKY <span class="version-tag">ENTERPRISE v2.4</span></span>
+                <span class="system-sub">FORENSIC TELEMETRY &amp; COMPLIANCE SUITE</span>
             </div>
-          </div>
-          <pre id="scan-terminal-pre" style="white-space: pre-wrap; color: var(--text-primary); margin: 0;"></pre>
+            <div class="nav-divider"></div>
+            <div class="badge badge-subtle">WARRANT SCOPE: NTRO-2026-ACTIVE</div>
         </div>
-      </div>
+
+        <div class="nav-right">
+            <div class="status-indicator-pill">
+                <span class="pulse-dot"></span>
+                <span>AUDIT CHAIN ONLINE</span>
+            </div>
+            <div class="telemetry-clock">
+                <span class="clock-label">SYS_UTC:</span>
+                <span id="live-clock" class="mono-num">00:00:00 UTC</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <nav class="nav-menu">
+                <div class="nav-group-label">WORKSPACE</div>
+                <button class="nav-item active" data-tab="tab-fleet">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" /><rect x="2" y="14" width="20" height="8" rx="2" /><line x1="6" y1="6" x2="6.01" y2="6" /><line x1="6" y1="18" x2="6.01" y2="18" /></svg>
+                    Fleet &amp; Triage
+                </button>
+                <button class="nav-item" data-tab="tab-studio">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6" /><polyline points="8 6 2 12 8 18" /></svg>
+                    DSL Compiler (LLVM)
+                </button>
+                <button class="nav-item" data-tab="tab-custody">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
+                    Chain of Custody
+                </button>
+                <button class="nav-item" data-tab="tab-transport">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" /><line x1="2" y1="12" x2="22" y2="12" /><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" /></svg>
+                    Covert Routing &amp; WS
+                </button>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="officer-card">
+                    <div class="officer-meta">
+                        <span class="officer-id">OFFICER-VK-902</span>
+                        <span class="officer-role">SECTION 69 INVESTIGATOR</span>
+                    </div>
+                    <span class="badge badge-active">VERIFIED</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="content-workspace">
+
+            <!-- Top Metrics Strip -->
+            <section class="kpi-grid">
+                <div class="kpi-card">
+                    <span class="kpi-label">Monitored Endpoints</span>
+                    <div class="kpi-body">
+                        <span class="kpi-val highlight-accent" id="stat-hosts">4</span>
+                        <span class="kpi-tag neutral">LIVE AGENTS</span>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <span class="kpi-label">Adverse Indicators</span>
+                    <div class="kpi-body">
+                        <span class="kpi-val" id="stat-findings">22</span>
+                        <span class="kpi-tag neutral">TRIAGE FLAGGED</span>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <span class="kpi-label">Authorizations (IT Sec 69)</span>
+                    <div class="kpi-body">
+                        <span class="kpi-val" id="stat-warrants">2</span>
+                        <span class="kpi-tag highlight">SEALED</span>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <span class="kpi-label">Ledger Blocks</span>
+                    <div class="kpi-body">
+                        <span class="kpi-val highlight-accent" id="stat-blocks">4</span>
+                        <span class="kpi-tag highlight">SEC 65B VALID</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 1: FLEET & LIVE TRIAGE -->
+            <div id="tab-fleet" class="tab-panel active">
+                <div class="panel-card">
+                    <div class="panel-header">
+                        <div class="header-titles">
+                            <h3>Target Endpoints</h3>
+                            <p>Fleet state, connected forensic runtimes, and immediate scan triggers</p>
+                        </div>
+                        <div class="header-actions">
+                            <span class="badge badge-accent" id="selected-host-badge">TARGET: HOST-001</span>
+                            <button class="btn btn-secondary" id="btn-refresh-hosts">Refresh Fleet</button>
+                        </div>
+                    </div>
+
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Host ID</th>
+                                    <th>Platform</th>
+                                    <th>Agent Status</th>
+                                    <th>Flagged Artifacts</th>
+                                    <th>IP Address</th>
+                                    <th>Last Investigation</th>
+                                    <th style="text-align: right;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="hosts-tbody">
+                                <!-- Dynamically populated via app.js -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="action-footer">
+                        <div class="action-buttons">
+                            <button class="btn btn-primary" id="btn-console-run-script">Execute Inspection</button>
+                            <button class="btn btn-secondary" id="btn-console-collect-evidence">Seize Disk &amp; Proc Evidence</button>
+                            <button class="btn btn-secondary" id="btn-console-generate-report">Generate Forensics Report</button>
+                        </div>
+                        <div class="action-status" id="console-action-msg">Targeting: <strong>HOST-001</strong> (windows)</div>
+                    </div>
+
+                    <!-- Execution Console Feed -->
+                    <div id="scan-terminal-container" class="terminal-wrapper" style="display: none;">
+                        <div class="terminal-bar">
+                            <div class="terminal-dots"><span></span><span></span><span></span></div>
+                            <span class="terminal-title">FORENSIC RUNTIME INSPECTOR — STDOUT</span>
+                            <div class="terminal-links">
+                                <a id="btn-modal-open-html" href="#" target="_blank" class="btn-xs" style="display:none;">HTML Report</a>
+                                <a id="btn-modal-open-json" href="#" target="_blank" class="btn-xs" style="display:none;">Raw JSON</a>
+                            </div>
+                        </div>
+                        <pre id="scan-terminal-pre" class="terminal-content"></pre>
+                    </div>
+                </div>
+
+                <!-- Investigation Reports Summary -->
+                <div class="panel-card" style="margin-top: 1.25rem;">
+                    <div class="panel-header">
+                        <div class="header-titles">
+                            <h3>Forensic Deliverables &amp; Evidence Records</h3>
+                            <p>Cryptographically stamped HTML/JSON reports generated for legal submission</p>
+                        </div>
+                        <button class="btn btn-secondary btn-sm" id="btn-refresh-reports">Sync Reports</button>
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Target Host</th>
+                                    <th>Scan Ref ID</th>
+                                    <th>Artifact Items</th>
+                                    <th>Findings</th>
+                                    <th>Format</th>
+                                    <th style="text-align: right;">Report File</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reports-tbody">
+                                <!-- Dynamically populated -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: COMPILER & LLVM STUDIO -->
+            <div id="tab-studio" class="tab-panel">
+                <div class="split-view">
+                    <div class="panel-card">
+                        <div class="panel-header">
+                            <div class="header-titles">
+                                <h3>JOCKY Script Editor</h3>
+                                <p>Native safe scripting layer for scoped endpoint extraction</p>
+                            </div>
+                            <select id="template-select" class="form-select select-compact">
+                                <option value="investigation">Endpoint Forensic Analysis (Standard)</option>
+                                <option value="triage">Fast Triage Scan</option>
+                                <option value="windows-persistence">Windows Persistence &amp; MFT</option>
+                                <option value="linux-ebpf">Linux Kernel eBPF Telemetry</option>
+                                <option value="pqc-vault">Post-Quantum Vault (ML-KEM)</option>
+                            </select>
+                        </div>
+                        <div class="editor-shell">
+                            <textarea id="dsl-input" class="code-area" spellcheck="false"></textarea>
+                        </div>
+                        <div class="editor-controls">
+                            <select id="target-os-select" class="form-select">
+                                <option value="windows">Target: Windows (x86_64)</option>
+                                <option value="linux">Target: Linux (eBPF)</option>
+                            </select>
+                            <button class="btn btn-secondary" id="btn-compile">Verify &amp; Emit LLVM IR</button>
+                            <button class="btn btn-primary" id="btn-execute-live-scan">Live Direct Execute</button>
+                            <button class="btn btn-secondary" id="btn-dispatch">Dispatch Warranted Job</button>
+                        </div>
+                        <div id="compile-status" class="status-banner"></div>
+                    </div>
+
+                    <div class="panel-card">
+                        <div class="panel-header">
+                            <div class="header-titles">
+                                <h3>Emitted LLVM Intermediate Representation</h3>
+                                <p>Target machine code emission before in-memory staging</p>
+                            </div>
+                            <span class="badge badge-mono" id="ir-target-badge">x86_64-pc-windows-msvc</span>
+                        </div>
+                        <div class="ir-viewer-box">
+                            <pre id="ir-display">; Awaiting compilation pass...</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: AUDIT LEDGER & LEGAL CUSTODY -->
+            <div id="tab-custody" class="tab-panel">
+                <div class="panel-card">
+                    <div class="panel-header">
+                        <div class="header-titles">
+                            <h3>Cryptographic Audit Chain (Sec 65B Admissible)</h3>
+                            <p>Append-only hash chain linking every scan operation to warrant approvals</p>
+                        </div>
+                        <button class="btn btn-primary" id="btn-verify-chain">Validate Hash Chain</button>
+                    </div>
+                    <div id="chain-verify-status" class="verify-alert" style="display:none;"></div>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Block</th>
+                                    <th>Event Class</th>
+                                    <th>Warrant Ref</th>
+                                    <th>Signer</th>
+                                    <th>Block Hash (SHA-256)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ledger-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="panel-card" style="margin-top: 1.25rem;">
+                    <div class="panel-header">
+                        <div class="header-titles">
+                            <h3>Dual-Officer Authorization Check</h3>
+                            <p>Requires secondary countersignature before executing deep investigative scripts</p>
+                        </div>
+                    </div>
+                    <div class="approval-form">
+                        <div class="form-group">
+                            <label>COUNTERSIGNING OFFICER ID</label>
+                            <input type="text" id="approval-officer-id" placeholder="OFFICER-DS-771" class="form-input">
+                        </div>
+                        <div class="form-group flex-2">
+                            <label>LEGAL REASONING / NOTES</label>
+                            <input type="text" id="approval-notes" placeholder="Warrant scope confirmed for designated target IP" class="form-input">
+                        </div>
+                        <button class="btn btn-primary" id="btn-approve-session">Countersign Session</button>
+                    </div>
+                    <div id="approval-status" class="status-banner"></div>
+                    <div id="pending-sessions-list" class="pending-list"></div>
+                </div>
+            </div>
+
+            <!-- TAB 4: ROUTING & TELEMETRY -->
+            <div id="tab-transport" class="tab-panel">
+                <div class="split-view">
+                    <div class="panel-card">
+                        <div class="panel-header">
+                            <div class="header-titles">
+                                <h3>Covert CDN Domain Fronting</h3>
+                                <p>Configure SNI masking for egress traffic through authorized endpoints</p>
+                            </div>
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Target Session ID</label>
+                                <input type="text" id="front-session-id" placeholder="UUID from dispatch" class="form-input">
+                            </div>
+                            <div class="form-group">
+                                <label>Front Domain (SNI)</label>
+                                <input type="text" id="front-domain" value="cloudflare.com" class="form-input">
+                            </div>
+                            <div class="form-group">
+                                <label>Real Backend Host</label>
+                                <input type="text" id="front-real-host" value="forensics-gw.ntro.gov.in" class="form-input">
+                            </div>
+                            <div class="form-group">
+                                <label>Telemetry WSS Gateway</label>
+                                <input type="text" id="front-backend-url" value="wss://forensics-gw.ntro.gov.in/telemetry" class="form-input">
+                            </div>
+                        </div>
+                        <div class="form-checkbox-row">
+                            <label class="custom-check">
+                                <input type="checkbox" id="front-enabled" checked>
+                                <span>Enable Masked Transport Routing</span>
+                            </label>
+                            <button class="btn btn-secondary" id="btn-configure-front">Save Routing Rules</button>
+                        </div>
+                        <div id="front-status" class="status-banner"></div>
+                        <pre id="front-result" class="code-preview" style="display:none;"></pre>
+                    </div>
+
+                    <div class="panel-card">
+                        <div class="panel-header">
+                            <div class="header-titles">
+                                <h3>Live Agent Telemetry Stream</h3>
+                                <p>Real-time encrypted WebSocket log output</p>
+                            </div>
+                            <div class="stream-controls">
+                                <span id="ws-status" class="badge badge-mono">● DISCONNECTED</span>
+                                <button class="btn btn-sm btn-secondary" id="btn-connect-ws">Connect</button>
+                                <button class="btn btn-sm btn-secondary" id="btn-disconnect-ws">Disconnect</button>
+                            </div>
+                        </div>
+                        <div id="telemetry-feed" class="live-stream-box">
+                            <div class="stream-placeholder">[ Awaiting active agent streaming connection... ]</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
     </div>
 
-    <!-- Forensic DSL Compiler & Session Dispatcher -->
-    <div class="card">
-      <div class="card-header">
-        <div class="card-title">⚡ JOCKY Programming Language &amp; Scripting Layer</div>
-        <span class="brand-badge">Cross-Platform Compiler / IR</span>
-      </div>
-      <div class="dsl-editor">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-          <label style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">JOCKY SCRIPT (.jocky)</label>
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="font-size: 0.75rem; color: var(--text-muted);">Quick Template:</span>
-            <select id="template-select" style="background: #0d121d; color: var(--accent-cyan); border: 1px solid var(--border-subtle); padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; cursor: pointer;">
-              <option value="investigation">Endpoint Forensic Analysis (Procedural)</option>
-              <option value="triage">Triage Scan (Minimal Profile)</option>
-              <option value="windows-persistence">Windows Persistence &amp; Run Keys</option>
-              <option value="linux-ebpf">Linux Kernel eBPF Probes</option>
-              <option value="pqc-vault">Post-Quantum Vault (ML-KEM)</option>
-            </select>
-          </div>
-        </div>
-        <textarea id="dsl-input">// JOCKY Forensic Script — Endpoint Investigative Triage
-system.processes()
-system.services()
-system.network_connections()
-system.users()
-system.persistence()
-
-forensic.collect_logs()
-forensic.collect_files()
-forensic.generate_report()</textarea>
-        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-          <select id="target-os-select" style="background: #0d121d; color: var(--text-primary); border: 1px solid var(--border-subtle); padding: 8px 12px; border-radius: 6px; font-size: 0.85rem;">
-            <option value="windows">Target: Windows</option>
-            <option value="linux">Target: Ubuntu / Linux</option>
-          </select>
-          <button class="btn" id="btn-compile">Compile to LLVM IR</button>
-          <button class="btn btn-secondary" id="btn-execute-live-scan" style="border-color: var(--accent-cyan); color: var(--accent-cyan);">Execute Live Scan</button>
-          <button class="btn btn-secondary" id="btn-dispatch">Dispatch Warrant Session</button>
-        </div>
-        <div id="compile-status" style="font-size: 0.8rem; min-height: 20px;"></div>
-      </div>
-    </div>
-
-    <!-- LLVM IR Output Preview -->
-    <div class="card">
-      <div class="card-header">
-        <div class="card-title">🔬 Emitted LLVM Intermediate Representation</div>
-        <span class="brand-badge" id="ir-target-badge">x86_64-pc-windows-msvc</span>
-      </div>
-      <div class="ir-output" id="ir-display">; Compile a script to inspect generated LLVM IR text with runtime linkage declarations...</div>
-    </div>
-
-    <!-- Generated Investigation Reports -->
-    <div class="card">
-      <div class="card-header">
-        <div class="card-title">📁 Generated Forensic Investigation Reports</div>
-        <button class="btn btn-secondary" style="font-size: 0.75rem; padding: 4px 10px;" id="btn-refresh-reports">Refresh Reports</button>
-      </div>
-      <table>
-        <thead>
-          <tr>
-            <th>Host</th>
-            <th>Scan ID</th>
-            <th>Evidence Items</th>
-            <th>Findings</th>
-            <th>Report Format</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody id="reports-tbody">
-          <tr>
-            <td style="font-family: var(--font-mono); font-weight: 700;">WORKSTATION-01</td>
-            <td style="font-family: var(--font-mono); color: var(--accent-cyan);">JCK-2026-001</td>
-            <td>1,440 items</td>
-            <td><span class="badge-findings findings-alert">12</span></td>
-            <td><span class="tag tag-linux">HTML + JSON</span></td>
-            <td><a href="/reports/WORKSTATION-01-2026-09-17.html" target="_blank" class="btn-action-sm">View Report</a></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-
-    <!-- Multi-Officer Approval Panel -->
-    <div class="card">
-      <div class="card-header">
-        <div class="card-title">🪪 Multi-Officer Approval (Dual-Control Policy)</div>
-        <span class="brand-badge">IT Act Sec 69 Compliance</span>
-      </div>
-      <div style="display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 14px;">
-        <div style="flex: 1; min-width: 160px;">
-          <label style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 4px;">APPROVING OFFICER ID</label>
-          <input type="text" id="approval-officer-id" placeholder="OFFICER-ID (must differ from creator)"
-            style="width: 100%; background: #0d121d; color: var(--text-primary); border: 1px solid var(--border-subtle); padding: 8px 12px; border-radius: 6px; font-size: 0.85rem; box-sizing: border-box;" />
-        </div>
-        <div style="flex: 1; min-width: 160px;">
-          <label style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 4px;">APPROVAL NOTES (OPTIONAL)</label>
-          <input type="text" id="approval-notes" placeholder="Verified warrant signature, target confirmed..."
-            style="width: 100%; background: #0d121d; color: var(--text-primary); border: 1px solid var(--border-subtle); padding: 8px 12px; border-radius: 6px; font-size: 0.85rem; box-sizing: border-box;" />
-        </div>
-        <button class="btn" id="btn-approve-session" style="white-space: nowrap;">Countersign Session</button>
-      </div>
-      <div id="approval-status" style="font-size: 0.8rem; min-height: 20px;"></div>
-      <div id="pending-sessions-list" style="margin-top: 10px;"></div>
-    </div>
-
-    <!-- Domain Fronting / CDN Routing -->
-    <div class="card">
-      <div class="card-header">
-        <div class="card-title">🌐 Domain Fronting — CDN Covert Transport</div>
-        <span class="brand-badge">SNI Masking</span>
-      </div>
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
-        <div>
-          <label style="display:block; font-size:0.75rem; color:var(--text-muted); margin-bottom:4px;">Session ID</label>
-          <input type="text" id="front-session-id" placeholder="session UUID from Dispatch" style="width:100%; box-sizing:border-box;">
-        </div>
-        <div>
-          <label style="display:block; font-size:0.75rem; color:var(--text-muted); margin-bottom:4px;">CDN Front Domain (SNI)</label>
-          <input type="text" id="front-domain" placeholder="cloudflare.com" style="width:100%; box-sizing:border-box;" value="cloudflare.com">
-        </div>
-        <div>
-          <label style="display:block; font-size:0.75rem; color:var(--text-muted); margin-bottom:4px;">Real Host (HTTP Host header)</label>
-          <input type="text" id="front-real-host" placeholder="forensics-gw.ntro.gov.in" style="width:100%; box-sizing:border-box;" value="forensics-gw.ntro.gov.in">
-        </div>
-        <div>
-          <label style="display:block; font-size:0.75rem; color:var(--text-muted); margin-bottom:4px;">Backend WSS URL</label>
-          <input type="text" id="front-backend-url" placeholder="wss://forensics-gw.ntro.gov.in/telemetry" style="width:100%; box-sizing:border-box;" value="wss://forensics-gw.ntro.gov.in/telemetry">
-        </div>
-      </div>
-      <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px;">
-        <label style="font-size:0.8rem; color:var(--text-secondary); cursor:pointer;">
-          <input type="checkbox" id="front-enabled" checked style="margin-right:6px;">Enable Fronting
-        </label>
-        <button class="btn" id="btn-configure-front" style="background:rgba(139,92,246,0.15); border:1px solid #8b5cf6; color:#8b5cf6; font-size:0.8rem; padding:5px 14px;">Configure Covert Route</button>
-      </div>
-      <div id="front-status" style="font-size:0.8rem; min-height:20px;"></div>
-      <div id="front-result" style="display:none; font-family:var(--font-mono); font-size:0.75rem; background:#080d14; border:1px solid var(--border-subtle); border-radius:6px; padding:10px; margin-top:8px; color:var(--text-secondary); white-space:pre-wrap;"></div>
-    </div>
-
-    <!-- Live Telemetry Feed -->
-    <div class="card">
-      <div class="card-header">
-        <div class="card-title">📡 Live Agent Telemetry Feed</div>
-        <div style="display: flex; gap: 8px; align-items: center;">
-          <span id="ws-status" style="font-size: 0.75rem; color: var(--text-muted);">● DISCONNECTED</span>
-          <button class="btn btn-secondary" style="font-size: 0.75rem; padding: 4px 10px;" id="btn-connect-ws">Connect WS</button>
-          <button class="btn btn-secondary" style="font-size: 0.75rem; padding: 4px 10px;" id="btn-disconnect-ws">Disconnect</button>
-        </div>
-      </div>
-      <div id="telemetry-feed" style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-secondary); background: #080d14; border-radius: 6px; padding: 12px; height: 160px; overflow-y: auto; border: 1px solid var(--border-subtle);">
-        <div style="color: var(--text-muted);">[ Waiting for agent connection... ]</div>
-      </div>
-    </div>
-
-    <!-- Cryptographic Audit Ledger -->
-    <div class="card">
-      <div class="card-header">
-        <div class="card-title">🔒 Tamper-Proof Audit Ledger (IT Act Sec 69)</div>
-        <div style="display: flex; gap: 8px; align-items: center;">
-          <button class="btn" style="font-size: 0.75rem; padding: 4px 10px; background: rgba(16, 185, 129, 0.2); border: 1px solid var(--accent-emerald); color: var(--accent-emerald);" id="btn-verify-chain">Verify Chain Integrity (Sec 65B)</button>
-          <span class="brand-badge">SHA-256 Hash Chain</span>
-        </div>
-      </div>
-      <div id="chain-verify-status" style="display: none; padding: 10px 14px; margin-bottom: 12px; border-radius: 6px; font-size: 0.8rem; background: rgba(16, 185, 129, 0.08); border: 1px solid var(--accent-emerald);"></div>
-      <table>
-        <thead>
-          <tr>
-            <th>Block</th>
-            <th>Event</th>
-            <th>Warrant ID</th>
-            <th>Officer</th>
-            <th>Block Hash</th>
-          </tr>
-        </thead>
-        <tbody id="ledger-tbody">
-          <tr>
-            <td>#0</td>
-            <td><span class="tag tag-active">GENESIS</span></td>
-            <td>GENESIS</td>
-            <td>SYSTEM</td>
-            <td><span class="block-hash">e3b0c44298fc...</span></td>
-          </tr>
-          <tr>
-            <td>#1</td>
-            <td><span class="tag tag-linux">SESSION_CREATED</span></td>
-            <td>NTRO-2026-LINUX-0089</td>
-            <td>OFFICER-VK-902</td>
-            <td><span class="block-hash">7c8d92a11b0e...</span></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </main>
-
-  <script src="app.js"></script>
+    <script src="app.js"></script>
+    <script>
+        // Tab Switching Logic
+        document.querySelectorAll('.nav-item').forEach(btn => {
+        btn.addEventListener('click', () => {
+        document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        const targetTab = document.getElementById(btn.dataset.tab);
+        if (targetTab) targetTab.classList.add('active');
+        });
+        });
+    </script>
 </body>
 </html>
