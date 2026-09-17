@@ -6,6 +6,9 @@ pub mod crypto;
 pub mod forensics;
 pub mod obfuscator;
 pub mod runtime;
+pub mod report;
+pub mod engine;
+
 
 // Single process-wide mutex serialising all tests that touch env vars.
 // Cargo runs tests in parallel within a crate; concurrent set_var/remove_var

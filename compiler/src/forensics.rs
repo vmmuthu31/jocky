@@ -56,6 +56,11 @@ pub struct AuditEntry {
 
 pub mod windows;
 pub mod linux;
+pub mod services;
+pub mod users;
+pub mod persistence;
+pub mod network;
+pub mod indicators;
 
 pub use windows::registry::RegistryParser;
 pub use windows::mft::MFTParser;
@@ -63,4 +68,32 @@ pub use windows::eventlog::EventLogParser;
 pub use linux::proc_fs::ProcParser;
 pub use linux::auditd::AuditdParser;
 pub use linux::ebpf::{EbpfProbeManager, EbpfTelemetryBatch, EbpfProcessExecEvent, EbpfFileOpenEvent, EbpfSocketEvent};
+
+pub use services::{ServiceEntry, ServicesParser};
+pub use users::{UserEntry, UserParser};
+pub use persistence::{PersistenceEntry, PersistenceParser};
+pub use network::{SocketEntry, NetworkParser};
+pub use indicators::{SuspiciousIndicator, IndicatorSummary, Severity, IndicatorDetector};
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ScanResult {
+    pub host: String,
+    pub os: String,
+    pub scan_id: String,
+    pub timestamp: String,
+    pub evidence_count: usize,
+    pub processes_count: usize,
+    pub services_count: usize,
+    pub users_count: usize,
+    pub sockets_count: usize,
+    pub persistence_count: usize,
+    pub files_count: usize,
+    pub logs_count: usize,
+    pub indicators: Vec<SuspiciousIndicator>,
+    pub indicator_summary: IndicatorSummary,
+    pub evidence_sha256: String,
+    pub json_report_path: String,
+    pub html_report_path: String,
+}
+
 

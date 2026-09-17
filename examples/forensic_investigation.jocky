@@ -1,0 +1,10 @@
+// JOCKY Forensic Script — Endpoint Investigative Triage
+system.processes()
+system.services()
+system.network_connections()
+system.users()
+system.persistence()
+
+forensic.collect_logs()
+forensic.collect_files()
+forensic.generate_report()
