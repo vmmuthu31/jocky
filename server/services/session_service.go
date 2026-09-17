@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"sync"
 	"time"
@@ -197,6 +198,13 @@ func (s *SessionService) compileDSL(dslSource, targetOS string) (string, error) 
 			"../compiler/target/release/jocky-compile",
 			"compiler/target/debug/jocky-compile",
 			"compiler/target/release/jocky-compile",
+		}
+		if runtime.GOOS == "windows" {
+			var win []string
+			for _, c := range candidates {
+				win = append(win, c+".exe")
+			}
+			candidates = append(win, candidates...)
 		}
 		for _, c := range candidates {
 			if _, err := os.Stat(c); err == nil {
