@@ -302,7 +302,8 @@ mod tests {
         let prog = Parser::parse(source).expect("parse failed");
         let mut cg = CodeGenerator::new("emit_test", TargetOS::Windows).expect("cg init");
         cg.codegen_program(&prog, TargetOS::Windows).expect("codegen failed");
-        cg.emit_ir("/tmp/jocky_test.ll").expect("emit_ir failed");
-        assert!(std::path::Path::new("/tmp/jocky_test.ll").exists());
+        let out = std::env::temp_dir().join("jocky_test.ll");
+        cg.emit_ir(out.to_str().unwrap()).expect("emit_ir failed");
+        assert!(out.exists());
     }
 }

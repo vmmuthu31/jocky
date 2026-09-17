@@ -1,4 +1,9 @@
+<<<<<<< HEAD
 root: ./docs
+=======
+root: ./docs/
+
+>>>>>>> 31274944a9e5f2cab16873560889a122292b522c
 structure:
   readme: README.md
   summary: SUMMARY.md

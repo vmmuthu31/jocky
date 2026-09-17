@@ -111,12 +111,12 @@ mod tests {
 
     #[test]
     fn test_parse_audit_logs_execve() {
-        let p = "/tmp/audit_test.log";
+        let p = std::env::temp_dir().join("audit_test.log");
         write_audit_log(
-            p,
+            p.to_str().unwrap(),
             "type=EXECVE msg=audit(1694430720.123:42): argc=2 a0=\"/bin/bash\" a1=\"-c\"\n",
         );
-        let entries = AuditdParser::parse_audit_logs(p).expect("parse_audit_logs failed");
+        let entries = AuditdParser::parse_audit_logs(p.to_str().unwrap()).expect("parse_audit_logs failed");
         assert_eq!(entries.len(), 1);
         assert_eq!(entries[0].syscall, "execve");
         assert_eq!(entries[0].timestamp, 1_694_430_720);
@@ -124,9 +124,9 @@ mod tests {
 
     #[test]
     fn test_extract_execve() {
-        let p = "/tmp/audit_execve.log";
-        write_audit_log(p, "type=EXECVE msg=audit(1694430720.123:1): argc=1 a0=\"/bin/ls\"\n");
-        let entries = AuditdParser::extract_execve(p).expect("extract_execve failed");
+        let p = std::env::temp_dir().join("audit_execve.log");
+        write_audit_log(p.to_str().unwrap(), "type=EXECVE msg=audit(1694430720.123:1): argc=1 a0=\"/bin/ls\"\n");
+        let entries = AuditdParser::extract_execve(p.to_str().unwrap()).expect("extract_execve failed");
         assert!(!entries.is_empty());
         assert!(entries.iter().all(|e| e.syscall == "execve"));
     }
@@ -139,9 +139,9 @@ mod tests {
 
     #[test]
     fn test_extract_network_connect() {
-        let p = "/tmp/audit_connect.log";
-        write_audit_log(p, "type=CONNECT msg=audit(1694430720.456:10): addr=10.0.0.1\n");
-        let entries = AuditdParser::extract_network_connect(p).expect("extract connect failed");
+        let p = std::env::temp_dir().join("audit_connect.log");
+        write_audit_log(p.to_str().unwrap(), "type=CONNECT msg=audit(1694430720.456:10): addr=10.0.0.1\n");
+        let entries = AuditdParser::extract_network_connect(p.to_str().unwrap()).expect("extract connect failed");
         assert!(!entries.is_empty());
         assert!(entries.iter().all(|e| e.syscall == "connect"));
     }
