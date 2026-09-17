@@ -110,6 +110,7 @@ jobs:
         working-directory: compiler
         run: |
           cargo build --release
+          mkdir -p ../dist
           cargo deb --no-build --output ../dist/
       - uses: actions/upload-artifact@v4
         with:
@@ -132,7 +133,9 @@ jobs:
         working-directory: compiler
         run: |
           cargo build --release
-          cargo generate-rpm --output ../dist/
+          cargo generate-rpm
+          mkdir -p ../dist
+          cp target/generate-rpm/*.rpm ../dist/
       - uses: actions/upload-artifact@v4
         with:
           name: jocky-rpm
@@ -164,7 +167,7 @@ jobs:
   # ── GitHub Release ────────────────────────────────────────────────────────────
   release:
     name: Create GitHub Release
-    needs: [build, package-deb, package-rpm, package-windows-installer]
+    needs: [build]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
     steps:

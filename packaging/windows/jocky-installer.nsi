@@ -56,9 +56,10 @@ Section "JOCKY Compiler (required)" SecMain
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\JOCKY" \
     "DisplayVersion" "${APP_VERSION}"
 
-  ; Add to system PATH
-  EnVar::SetHKLM
-  EnVar::AddValue "PATH" "$INSTDIR"
+  ; Add to system PATH via registry
+  ReadRegStr $R0 HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "Path"
+  WriteRegExpandStr HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "Path" "$R0;$INSTDIR"
+  SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
 
   ; Write uninstaller
   WriteUninstaller "$INSTDIR\${UNINSTALLER}"
