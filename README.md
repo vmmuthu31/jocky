@@ -2,7 +2,30 @@
 
 **NTRO Hackathon 26148 · Smart India Hackathon · Blockchain & Cybersecurity Track**
 
+[![CI](https://github.com/vmmuthu31/jocky/actions/workflows/release.yml/badge.svg)](https://github.com/vmmuthu31/jocky/actions/workflows/release.yml)
+[![Release](https://img.shields.io/github/v/release/vmmuthu31/jocky)](https://github.com/vmmuthu31/jocky/releases/latest)
+![Platforms](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blue)
+
 JOCKY is an enterprise-grade digital forensics command-and-control platform built for authorized law-enforcement and intelligence operations under the IT Act 2000 §69.
+
+## Install
+
+**macOS / Linux**
+```bash
+curl -fsSL https://raw.githubusercontent.com/vmmuthu31/jocky/main/install.sh | sh
+```
+
+**Windows (PowerShell)**
+```powershell
+irm https://raw.githubusercontent.com/vmmuthu31/jocky/main/install.ps1 | iex
+```
+
+**Build from source**
+```bash
+git clone https://github.com/vmmuthu31/jocky.git && cd jocky && make install
+```
+
+→ [Full installation guide](docs/installation.md) · [Getting started](docs/getting-started.md) · [CLI reference](docs/cli-reference.md) · [Language reference](docs/language-reference.md)
 
 ---
 

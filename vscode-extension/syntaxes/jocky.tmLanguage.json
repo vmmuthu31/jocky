@@ -1,0 +1,86 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "JOCKY",
+  "scopeName": "source.jocky",
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#keywords" },
+    { "include": "#session-block" },
+    { "include": "#strings" },
+    { "include": "#numbers" },
+    { "include": "#operators" },
+    { "include": "#constants" }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.double-slash.jocky",
+          "match": "//.*$"
+        },
+        {
+          "name": "comment.block.jocky",
+          "begin": "/\\*",
+          "end": "\\*/"
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.jocky",
+          "match": "\\b(forensic|session|collect|encrypt|transmit|profile)\\b"
+        },
+        {
+          "name": "keyword.other.jocky",
+          "match": "\\b(target|warrant|via|key|aes256|chacha20|ml_kem|hsm_derived)\\b"
+        },
+        {
+          "name": "keyword.operator.jocky",
+          "match": "\\b(triage|full|stealth)\\b"
+        },
+        {
+          "name": "support.type.jocky",
+          "match": "\\b(registry|memory|disk|proc|auditd|network|ext4|mft_scan|all_processes|active_sockets|journal_inspection|execve|connect)\\b"
+        }
+      ]
+    },
+    "session-block": {
+      "begin": "\\bsession\\b",
+      "end": "\\}",
+      "name": "meta.block.session.jocky",
+      "patterns": [
+        { "include": "#comments" },
+        { "include": "#strings" },
+        { "include": "#keywords" },
+        {
+          "name": "variable.other.jocky",
+          "match": "\\b[A-Z][A-Z0-9_\\\\]*\\b"
+        }
+      ]
+    },
+    "strings": {
+      "name": "string.quoted.double.jocky",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        {
+          "name": "constant.character.escape.jocky",
+          "match": "\\\\."
+        }
+      ]
+    },
+    "numbers": {
+      "name": "constant.numeric.jocky",
+      "match": "\\b[0-9]+(\\.[0-9]+)?\\b"
+    },
+    "operators": {
+      "name": "keyword.operator.jocky",
+      "match": "[|:;,{}()=]"
+    },
+    "constants": {
+      "name": "constant.language.jocky",
+      "match": "\\b(true|false|null)\\b"
+    }
+  }
+}

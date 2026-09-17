@@ -1,0 +1,84 @@
+{
+  "name": "jocky-language",
+  "displayName": "JOCKY Forensic DSL",
+  "description": "Syntax highlighting, snippets, and language support for JOCKY forensic scripts (.jocky)",
+  "version": "0.1.0",
+  "publisher": "ntro-jocky",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vmmuthu31/jocky"
+  },
+  "engines": { "vscode": "^1.75.0" },
+  "categories": ["Programming Languages", "Snippets"],
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "jocky",
+        "aliases": ["JOCKY", "jocky"],
+        "extensions": [".jocky"],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "jocky",
+        "scopeName": "source.jocky",
+        "path": "./syntaxes/jocky.tmLanguage.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "jocky",
+        "path": "./snippets/jocky.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "jocky.compile",
+        "title": "JOCKY: Compile to LLVM IR",
+        "icon": "$(play)"
+      },
+      {
+        "command": "jocky.newSession",
+        "title": "JOCKY: New Forensic Session"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "jocky.compile",
+          "when": "resourceExtname == .jocky",
+          "group": "navigation"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "JOCKY",
+      "properties": {
+        "jocky.compilerPath": {
+          "type": "string",
+          "default": "jocky-compile",
+          "description": "Path to the jocky-compile binary"
+        },
+        "jocky.defaultTarget": {
+          "type": "string",
+          "enum": ["linux", "windows"],
+          "default": "linux",
+          "description": "Default compilation target OS"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.75.0",
+    "@types/node": "^18.0.0",
+    "typescript": "^5.0.0"
+  }
+}
