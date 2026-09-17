@@ -319,3 +319,67 @@ tr:hover td {
   color: var(--accent-cyan);
   font-size: 0.75rem;
 }
+
+.host-row {
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.host-row:hover {
+  background: rgba(0, 240, 255, 0.05);
+}
+
+.host-row-selected {
+  background: rgba(0, 240, 255, 0.1) !important;
+  border-left: 3px solid var(--accent-cyan);
+}
+
+.badge-findings {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.findings-alert {
+  background: rgba(244, 63, 94, 0.18);
+  color: var(--accent-rose);
+  border: 1px solid rgba(244, 63, 94, 0.35);
+}
+
+.findings-clean {
+  background: rgba(16, 185, 129, 0.18);
+  color: var(--accent-emerald);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+}
+
+.btn-action-sm {
+  font-size: 0.72rem;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  background: rgba(59, 130, 246, 0.15);
+  color: var(--accent-blue);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  transition: all 0.2s ease;
+}
+
+.btn-action-sm:hover {
+  background: rgba(59, 130, 246, 0.3);
+  color: #fff;
+}
+
+.scan-console-modal {
+  background: #090e18;
+  border: 1px solid var(--border-accent);
+  border-radius: 8px;
+  padding: 16px;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  line-height: 1.6;
+  margin-top: 14px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+}
+

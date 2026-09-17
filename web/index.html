@@ -32,20 +32,105 @@
     <div class="card full-width">
       <div class="stats-grid">
         <div class="stat-box">
+          <div class="stat-label">Monitored Endpoints</div>
+          <div class="stat-value" id="stat-hosts" style="color: var(--accent-cyan);">4</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Suspicious Indicators</div>
+          <div class="stat-value" id="stat-findings" style="color: var(--accent-rose);">22</div>
+        </div>
+        <div class="stat-box">
           <div class="stat-label">Active Warrants (Sec 69)</div>
           <div class="stat-value" id="stat-warrants">2</div>
         </div>
         <div class="stat-box">
-          <div class="stat-label">Connected Agents</div>
-          <div class="stat-value" id="stat-agents">3</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-label">Active Sessions</div>
-          <div class="stat-value" id="stat-sessions">1</div>
-        </div>
-        <div class="stat-box">
           <div class="stat-label">Audit Ledger Blocks</div>
-          <div class="stat-value" id="stat-blocks">4</div>
+          <div class="stat-value" id="stat-blocks" style="color: var(--accent-emerald);">4</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- JOCKY FORENSIC CONSOLE -->
+    <div class="card full-width">
+      <div class="card-header">
+        <div class="card-title">🖥️ JOCKY FORENSIC CONSOLE — Central Host Fleet Management</div>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <span class="brand-badge" id="selected-host-badge">TARGET: HOST-001</span>
+          <button class="btn btn-secondary" style="font-size: 0.75rem; padding: 4px 10px;" id="btn-refresh-hosts">Refresh Fleet</button>
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Host</th>
+            <th>Operating System</th>
+            <th>Status</th>
+            <th>Findings</th>
+            <th>IP Address</th>
+            <th>Last Scan ID</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="hosts-tbody">
+          <!-- Populated dynamically via GET /api/v1/hosts -->
+          <tr class="host-row host-row-selected" data-host="HOST-001" data-os="Windows">
+            <td style="font-weight: 700; font-family: var(--font-mono); color: var(--accent-cyan);">HOST-001</td>
+            <td><span class="tag tag-windows">Windows</span></td>
+            <td><span class="tag tag-active">ONLINE</span></td>
+            <td><span class="badge-findings findings-alert">12</span></td>
+            <td style="font-family: var(--font-mono); font-size: 0.8rem;">192.168.1.10</td>
+            <td style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted);">JCK-2026-001</td>
+            <td><button class="btn-action-sm btn-row-scan" data-host="HOST-001">Scan</button></td>
+          </tr>
+          <tr class="host-row" data-host="HOST-002" data-os="Ubuntu">
+            <td style="font-weight: 700; font-family: var(--font-mono); color: var(--accent-cyan);">HOST-002</td>
+            <td><span class="tag tag-linux">Ubuntu</span></td>
+            <td><span class="tag tag-active">ONLINE</span></td>
+            <td><span class="badge-findings findings-alert">3</span></td>
+            <td style="font-family: var(--font-mono); font-size: 0.8rem;">10.0.5.42</td>
+            <td style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted);">JCK-2026-002</td>
+            <td><button class="btn-action-sm btn-row-scan" data-host="HOST-002">Scan</button></td>
+          </tr>
+          <tr class="host-row" data-host="HOST-003" data-os="Windows">
+            <td style="font-weight: 700; font-family: var(--font-mono); color: var(--accent-cyan);">HOST-003</td>
+            <td><span class="tag tag-windows">Windows</span></td>
+            <td><span class="tag tag-linux">SCANNING</span></td>
+            <td><span class="badge-findings findings-alert">7</span></td>
+            <td style="font-family: var(--font-mono); font-size: 0.8rem;">192.168.1.105</td>
+            <td style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted);">JCK-2026-003</td>
+            <td><button class="btn-action-sm btn-row-scan" data-host="HOST-003">Scan</button></td>
+          </tr>
+          <tr class="host-row" data-host="HOST-004" data-os="Ubuntu">
+            <td style="font-weight: 700; font-family: var(--font-mono); color: var(--accent-cyan);">HOST-004</td>
+            <td><span class="tag tag-linux">Ubuntu</span></td>
+            <td><span class="tag tag-active">ONLINE</span></td>
+            <td><span class="badge-findings findings-clean">0</span></td>
+            <td style="font-family: var(--font-mono); font-size: 0.8rem;">10.0.5.99</td>
+            <td style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted);">JCK-2026-004</td>
+            <td><button class="btn-action-sm btn-row-scan" data-host="HOST-004">Scan</button></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Fleet Action Bar -->
+      <div style="display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap; align-items: center; border-top: 1px solid var(--border-subtle); padding-top: 14px;">
+        <button class="btn" id="btn-console-run-script">⚡ Run JOCKY Script</button>
+        <button class="btn btn-secondary" id="btn-console-collect-evidence" style="border-color: var(--accent-cyan); color: var(--accent-cyan);">📦 Collect Evidence</button>
+        <button class="btn btn-secondary" id="btn-console-generate-report" style="border-color: var(--accent-emerald); color: var(--accent-emerald);">📊 Generate Report</button>
+        <span id="console-action-msg" style="font-size: 0.82rem; color: var(--text-muted); margin-left: auto;">Targeting: <strong>HOST-001</strong></span>
+      </div>
+
+      <!-- Live Scan Terminal Modal Box -->
+      <div id="scan-terminal-container" style="display: none; margin-top: 16px;">
+        <div class="scan-console-modal">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span style="color: var(--accent-cyan); font-weight: 700;">SCAN EXECUTION FEEDBACK</span>
+            <div style="display: flex; gap: 8px;">
+              <a id="btn-modal-open-html" href="#" target="_blank" class="btn" style="padding: 3px 10px; font-size: 0.72rem; text-decoration: none; display: none;">View HTML Report</a>
+              <a id="btn-modal-open-json" href="#" target="_blank" class="btn btn-secondary" style="padding: 3px 10px; font-size: 0.72rem; text-decoration: none; display: none;">Download JSON</a>
+            </div>
+          </div>
+          <pre id="scan-terminal-pre" style="white-space: pre-wrap; color: var(--text-primary); margin: 0;"></pre>
         </div>
       </div>
     </div>
@@ -53,36 +138,41 @@
     <!-- Forensic DSL Compiler & Session Dispatcher -->
     <div class="card">
       <div class="card-header">
-        <div class="card-title">⚡ Forensic DSL Compiler & Session Dispatch</div>
-        <span class="brand-badge">LLVM 18.1 Polymorphic IR</span>
+        <div class="card-title">⚡ JOCKY Programming Language &amp; Scripting Layer</div>
+        <span class="brand-badge">Cross-Platform Compiler / IR</span>
       </div>
       <div class="dsl-editor">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-          <label style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">JOCKY DSL SCRIPT (.jocky)</label>
+          <label style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">JOCKY SCRIPT (.jocky)</label>
           <div style="display: flex; align-items: center; gap: 8px;">
             <span style="font-size: 0.75rem; color: var(--text-muted);">Quick Template:</span>
             <select id="template-select" style="background: #0d121d; color: var(--accent-cyan); border: 1px solid var(--border-subtle); padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; cursor: pointer;">
-              <option value="custom">-- Custom DSL Script --</option>
+              <option value="investigation">Endpoint Forensic Analysis (Procedural)</option>
               <option value="triage">Triage Scan (Minimal Profile)</option>
-              <option value="windows-persistence">Windows Persistence & Run Keys</option>
+              <option value="windows-persistence">Windows Persistence &amp; Run Keys</option>
               <option value="linux-ebpf">Linux Kernel eBPF Probes</option>
               <option value="pqc-vault">Post-Quantum Vault (ML-KEM)</option>
             </select>
           </div>
         </div>
-        <textarea id="dsl-input">forensic session {
-    target: "10.0.5.42";
-    warrant: "NTRO-2026-LINUX-0089";
-    profile: triage;
-}</textarea>
+        <textarea id="dsl-input">// JOCKY Forensic Script — Endpoint Investigative Triage
+system.processes()
+system.services()
+system.network_connections()
+system.users()
+system.persistence()
+
+forensic.collect_logs()
+forensic.collect_files()
+forensic.generate_report()</textarea>
         <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
           <select id="target-os-select" style="background: #0d121d; color: var(--text-primary); border: 1px solid var(--border-subtle); padding: 8px 12px; border-radius: 6px; font-size: 0.85rem;">
-            <option value="linux">Target: Linux (eBPF/procfs)</option>
-            <option value="windows">Target: Windows (WDK/ETW/Registry)</option>
+            <option value="windows">Target: Windows</option>
+            <option value="linux">Target: Ubuntu / Linux</option>
           </select>
           <button class="btn" id="btn-compile">Compile to LLVM IR</button>
-          <button class="btn btn-secondary" id="btn-dispatch">Dispatch Session</button>
-          <button class="btn btn-secondary" id="btn-simulate" style="border-color: var(--accent-cyan); color: var(--accent-cyan);">Simulate Local Run</button>
+          <button class="btn btn-secondary" id="btn-execute-live-scan" style="border-color: var(--accent-cyan); color: var(--accent-cyan);">Execute Live Scan</button>
+          <button class="btn btn-secondary" id="btn-dispatch">Dispatch Warrant Session</button>
         </div>
         <div id="compile-status" style="font-size: 0.8rem; min-height: 20px;"></div>
       </div>
@@ -92,45 +182,41 @@
     <div class="card">
       <div class="card-header">
         <div class="card-title">🔬 Emitted LLVM Intermediate Representation</div>
-        <span class="brand-badge" id="ir-target-badge">x86_64-linux-gnu</span>
+        <span class="brand-badge" id="ir-target-badge">x86_64-pc-windows-msvc</span>
       </div>
       <div class="ir-output" id="ir-display">; Compile a script to inspect generated LLVM IR text with runtime linkage declarations...</div>
     </div>
 
-    <!-- Active Agents Fleet -->
+    <!-- Generated Investigation Reports -->
     <div class="card">
       <div class="card-header">
-        <div class="card-title">🛰️ Field Agent Fleet</div>
-        <button class="btn btn-secondary" style="font-size: 0.75rem; padding: 4px 10px;" id="btn-refresh-agents">Refresh</button>
+        <div class="card-title">📁 Generated Forensic Investigation Reports</div>
+        <button class="btn btn-secondary" style="font-size: 0.75rem; padding: 4px 10px;" id="btn-refresh-reports">Refresh Reports</button>
       </div>
       <table>
         <thead>
           <tr>
-            <th>Agent ID</th>
-            <th>Hostname</th>
-            <th>Platform</th>
-            <th>IP Address</th>
-            <th>Status</th>
+            <th>Host</th>
+            <th>Scan ID</th>
+            <th>Evidence Items</th>
+            <th>Findings</th>
+            <th>Report Format</th>
+            <th>Action</th>
           </tr>
         </thead>
-        <tbody id="agents-tbody">
+        <tbody id="reports-tbody">
           <tr>
-            <td style="font-family: var(--font-mono);">agent-lx-01</td>
-            <td>prod-gateway-01</td>
-            <td><span class="tag tag-linux">Linux 6.5</span></td>
-            <td>10.0.5.42</td>
-            <td><span class="tag tag-active">ONLINE</span></td>
-          </tr>
-          <tr>
-            <td style="font-family: var(--font-mono);">agent-win-02</td>
-            <td>corp-dc-primary</td>
-            <td><span class="tag tag-windows">Win 11 23H2</span></td>
-            <td>192.168.1.10</td>
-            <td><span class="tag tag-active">ONLINE</span></td>
+            <td style="font-family: var(--font-mono); font-weight: 700;">WORKSTATION-01</td>
+            <td style="font-family: var(--font-mono); color: var(--accent-cyan);">JCK-2026-001</td>
+            <td>1,440 items</td>
+            <td><span class="badge-findings findings-alert">12</span></td>
+            <td><span class="tag tag-linux">HTML + JSON</span></td>
+            <td><a href="/reports/WORKSTATION-01-2026-09-17.html" target="_blank" class="btn-action-sm">View Report</a></td>
           </tr>
         </tbody>
       </table>
     </div>
+
 
     <!-- Multi-Officer Approval Panel -->
     <div class="card">
