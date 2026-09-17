@@ -23,7 +23,8 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - uses: actions/setup-go@v5
         with:
-          go-version: '1.22'
+          go-version: '1.23'
+          cache: false
       - name: Rust tests
         working-directory: compiler
         run: cargo test
@@ -32,6 +33,8 @@ jobs:
       - name: Go tests
         working-directory: server
         run: go test ./...
+        env:
+          CGO_ENABLED: "0"
 
   # ── Binary builds (one job per target) ───────────────────────────────────────
   build:
