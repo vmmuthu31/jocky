@@ -2,6 +2,8 @@
 ; Produces: jocky-setup-x86_64.exe
 ; Build: makensis jocky-installer.nsi
 
+!include "WinMessages.nsh"
+
 !define APP_NAME     "JOCKY"
 !define APP_VERSION  "1.0.0"
 !define APP_EXE      "jocky-compile.exe"
@@ -74,9 +76,12 @@ SectionEnd
 
 ;------------------------------------------------------------
 Section "Uninstall"
-  ; Remove from PATH
-  EnVar::SetHKLM
-  EnVar::DeleteValue "PATH" "$INSTDIR"
+  ; Remove from PATH via registry
+  ReadRegStr $R0 HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "Path"
+  ${StrRep} $R1 "$R0" ";$INSTDIR" ""
+  ${StrRep} $R1 "$R1" "$INSTDIR;" ""
+  WriteRegExpandStr HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "Path" "$R1"
+  SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
 
   ; Remove files
   Delete "$INSTDIR\jocky-compile.exe"

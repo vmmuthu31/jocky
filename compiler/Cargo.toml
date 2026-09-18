@@ -21,7 +21,6 @@ priority = "optional"
 assets = [
   ["target/release/jocky-compile", "usr/bin/", "755"],
   ["../README.md", "usr/share/doc/jocky/", "644"],
-  ["../examples/", "usr/share/jocky/examples/", "644"],
 ]
 
 [[bin]]

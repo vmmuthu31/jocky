@@ -26,21 +26,23 @@ Installs to `%USERPROFILE%\.jocky\bin\` and adds it to your PATH.
 
 Download the binary for your platform from the [latest release](https://github.com/vmmuthu31/jocky/releases/latest):
 
-| Platform | File |
-|----------|------|
-| macOS (Apple Silicon M1/M2/M3) | `jocky-macos-arm64` |
-| macOS (Intel) | `jocky-macos-x86_64` |
-| Linux x86_64 | `jocky-linux-x86_64` |
-| Linux ARM64 | `jocky-linux-arm64` |
-| Windows x86_64 | `jocky-windows-x86_64.exe` |
+| Platform                       | File                         |
+| ------------------------------ | ---------------------------- |
+| macOS (Apple Silicon M1/M2/M3) | `jocky-macos-arm64`        |
+| macOS (Intel)                  | `jocky-macos-x86_64`       |
+| Linux x86_64                   | `jocky-linux-x86_64`       |
+| Linux ARM64                    | `jocky-linux-arm64`        |
+| Windows x86_64                 | `jocky-windows-x86_64.exe` |
 
 **macOS / Linux** — make executable and move to PATH:
+
 ```bash
 chmod +x jocky-macos-arm64
 sudo mv jocky-macos-arm64 /usr/local/bin/jocky-compile
 ```
 
 **Windows** — rename and add to PATH:
+
 ```powershell
 Rename-Item jocky-windows-x86_64.exe jocky-compile.exe
 Move-Item jocky-compile.exe "$env:USERPROFILE\.jocky\bin\"
@@ -61,6 +63,7 @@ make install      # copies to /usr/local/bin (Unix)
 ```
 
 Or directly with cargo:
+
 ```bash
 cd compiler
 cargo build --release
@@ -76,6 +79,7 @@ jocky-compile --help
 ```
 
 Expected output:
+
 ```
 JOCKY forensic DSL compiler — NTRO Hackathon 26148
 
@@ -102,6 +106,7 @@ Install the JOCKY language extension for syntax highlighting, snippets, and one-
 4. Click Install
 
 Or install from the `.vsix` file:
+
 ```bash
 cd jocky/vscode-extension
 npm install
@@ -130,12 +135,12 @@ See [Server Configuration](./server-config.md) for production setup with mTLS.
 
 ## Environment Variables
 
-| Variable | Required | Default | Description |
-|----------|----------|---------|-------------|
-| `JOCKY_HSM_MASTER_KEY` | Production | — | 64-hex-char master key for HKDF key derivation |
-| `JOCKY_ALLOW_DEV_KEY` | Dev only | — | Set `1` to use built-in dev key (never in production) |
-| `JOCKY_COMPILER_PATH` | Server | `jocky-compile` | Path to compiler binary |
-| `JOCKY_WEB_DIR` | Server | `../web` | Web dashboard assets directory |
-| `JOCKY_TLS_CERT` | mTLS | — | Server TLS certificate path |
-| `JOCKY_TLS_KEY` | mTLS | — | Server private key path |
-| `JOCKY_TLS_CA` | mTLS | — | CA certificate for client verification |
+| Variable                 | Required   | Default           | Description                                            |
+| ------------------------ | ---------- | ----------------- | ------------------------------------------------------ |
+| `JOCKY_HSM_MASTER_KEY` | Production | —                | 64-hex-char master key for HKDF key derivation         |
+| `JOCKY_ALLOW_DEV_KEY`  | Dev only   | —                | Set`1` to use built-in dev key (never in production) |
+| `JOCKY_COMPILER_PATH`  | Server     | `jocky-compile` | Path to compiler binary                                |
+| `JOCKY_WEB_DIR`        | Server     | `../web`        | Web dashboard assets directory                         |
+| `JOCKY_TLS_CERT`       | mTLS       | —                | Server TLS certificate path                            |
+| `JOCKY_TLS_KEY`        | mTLS       | —                | Server private key path                                |
+| `JOCKY_TLS_CA`         | mTLS       | —                | CA certificate for client verification                 |
