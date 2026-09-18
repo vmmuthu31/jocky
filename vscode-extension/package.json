@@ -2,7 +2,7 @@
   "name": "jocky-language",
   "displayName": "JOCKY Forensic DSL",
   "description": "Syntax highlighting, snippets, and language support for JOCKY forensic scripts (.jocky)",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "publisher": "Jocky",
   "icon": "icon.png",
   "repository": {
