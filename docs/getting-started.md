@@ -6,9 +6,14 @@ This guide walks you from zero to running your first forensic scan in under 5 mi
 
 ## Step 1 — Install
 
-**macOS / Linux:**
+**macOS / Linux** — one command, auto-detects your platform:
 ```bash
 curl -fsSL https://raw.githubusercontent.com/vmmuthu31/jocky/main/install.sh | sh
+```
+
+**macOS (Homebrew):**
+```bash
+brew install vmmuthu31/jocky/jocky
 ```
 
 **Windows (PowerShell):**

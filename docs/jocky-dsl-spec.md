@@ -84,7 +84,20 @@ forensic session {
 }
 ```
 
-## 7. Compliance Notes
+## 7. What the Compiler Generates vs. What It Runs
+
+`jocky-compile` is a **code-generation tool**, not a runtime executor.  When you compile a `.jocky` script:
+
+- It **parses** your script, validates the warrant, and **emits LLVM IR** (`.ll` files).
+- The IR encodes the forensic collection logic, including technique templates for kernel-level access (BYOVD minifilter), process hollowing, NTDLL unhooking, and direct-syscall dispatch.
+- These technique templates are **generated text** — they describe _how_ a forensic agent would operate; the compiler itself never executes them.
+- Actually running the generated IR requires a separate build step (LLVM `llc` → linker) and then explicit deployment to an authorized field agent.
+
+This separation means:
+- The `jocky-compile` binary you install is safe to run on your workstation — it only reads `.jocky` files and writes `.ll` IR.
+- Execution of the generated forensic agent requires an authorized NTRO deployment environment, a valid warrant, and dual-officer approval.
+
+## 8. Compliance Notes
 
 - Every `warrant` value must correspond to a valid IT Act 2000 Section 69 order
 - Sessions are cryptographically logged to the blockchain audit ledger

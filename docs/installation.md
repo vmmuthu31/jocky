@@ -10,7 +10,7 @@ JOCKY runs on macOS, Linux, and Windows. Choose the method that fits your setup.
 curl -fsSL https://raw.githubusercontent.com/vmmuthu31/jocky/main/install.sh | sh
 ```
 
-This downloads the latest release binary for your platform and installs it to `/usr/local/bin/jocky-compile`.
+Detects your OS and CPU, downloads the correct binary from the latest GitHub release, and installs it to `/usr/local/bin/jocky-compile` (or `~/.local/bin/` if `/usr/local/bin` is not writable).
 
 ## One-line Install (Windows PowerShell)
 
@@ -18,7 +18,17 @@ This downloads the latest release binary for your platform and installs it to `/
 irm https://raw.githubusercontent.com/vmmuthu31/jocky/main/install.ps1 | iex
 ```
 
-Installs to `%USERPROFILE%\.jocky\bin\` and adds it to your PATH.
+Downloads the latest Windows binary and installs it to `%USERPROFILE%\.jocky\bin\`, adding that directory to your user PATH automatically.
+
+---
+
+## Homebrew (macOS)
+
+```bash
+brew install vmmuthu31/jocky/jocky
+```
+
+This installs `jocky-compile` via the official tap. Upgrade with `brew upgrade vmmuthu31/jocky/jocky`.
 
 ---
 
@@ -135,12 +145,36 @@ See [Server Configuration](./server-config.md) for production setup with mTLS.
 
 ## Environment Variables
 
-| Variable                 | Required   | Default           | Description                                            |
-| ------------------------ | ---------- | ----------------- | ------------------------------------------------------ |
-| `JOCKY_HSM_MASTER_KEY` | Production | —                | 64-hex-char master key for HKDF key derivation         |
-| `JOCKY_ALLOW_DEV_KEY`  | Dev only   | —                | Set`1` to use built-in dev key (never in production) |
-| `JOCKY_COMPILER_PATH`  | Server     | `jocky-compile` | Path to compiler binary                                |
-| `JOCKY_WEB_DIR`        | Server     | `../web`        | Web dashboard assets directory                         |
-| `JOCKY_TLS_CERT`       | mTLS       | —                | Server TLS certificate path                            |
-| `JOCKY_TLS_KEY`        | mTLS       | —                | Server private key path                                |
-| `JOCKY_TLS_CA`         | mTLS       | —                | CA certificate for client verification                 |
+| Variable                  | Required   | Default           | Description                                                                                     |
+| ------------------------- | ---------- | ----------------- | ----------------------------------------------------------------------------------------------- |
+| `JOCKY_HSM_MASTER_KEY`  | Production | —                | 64-hex-char master key for HKDF key derivation                                                  |
+| `JOCKY_ALLOW_DEV_KEY`   | Dev only   | —                | Set `1` to use built-in dev key (never in production)                                          |
+| `JOCKY_WARRANT_DB_PATH` | Production | —                | Path to a JSON file for persistent warrant storage. If absent, warrants live in memory only and are lost on restart. Set this in production so registered warrants survive restarts. |
+| `JOCKY_COMPILER_PATH`   | Server     | `jocky-compile` | Path to compiler binary                                                                         |
+| `JOCKY_WEB_DIR`         | Server     | `../web`        | Web dashboard assets directory                                                                  |
+| `JOCKY_TLS_CERT`        | mTLS       | —                | Server TLS certificate path                                                                     |
+| `JOCKY_TLS_KEY`         | mTLS       | —                | Server private key path                                                                         |
+| `JOCKY_TLS_CA`          | mTLS       | —                | CA certificate for client verification                                                          |
+
+### Production server startup example
+
+```bash
+JOCKY_HSM_MASTER_KEY="<64-hex-char key from your HSM>" \
+JOCKY_WARRANT_DB_PATH="/var/lib/jocky/warrants.json" \
+JOCKY_COMPILER_PATH="/usr/local/bin/jocky-compile" \
+./jocky-server --port 8443 \
+  --tls-cert /etc/jocky/server.crt \
+  --tls-key  /etc/jocky/server.key \
+  --tls-ca   /etc/jocky/ntro-ca.crt
+```
+
+### Development / demo startup (single command)
+
+```bash
+JOCKY_ALLOW_DEV_KEY=1 \
+JOCKY_WARRANT_DB_PATH="./warrants.json" \
+JOCKY_COMPILER_PATH=$(which jocky-compile) \
+go run . --port 8080
+```
+
+On first run this creates `warrants.json` with the two demo warrants pre-seeded.  Any warrant you register via `POST /api/v1/warrants` is appended to that file and survives restarts.

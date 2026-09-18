@@ -4,8 +4,11 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -16,6 +19,7 @@ import (
 type WarrantService struct {
 	mu       sync.RWMutex
 	warrants map[string]models.Warrant
+	dbPath   string // path to warrant JSON file, empty = memory-only
 }
 
 // seedWarrantSignature computes a deterministic SHA-256 commitment over the
@@ -29,14 +33,37 @@ func seedWarrantSignature(id, o1, o2 string, issuedAt, validUntil time.Time) str
 	return base64.StdEncoding.EncodeToString(h[:])
 }
 
+// NewWarrantService creates a WarrantService and loads warrants from
+// JOCKY_WARRANT_DB_PATH if set.  If the file does not exist, two demo
+// warrants are seeded and persisted to that path so subsequent restarts
+// retain any newly registered warrants.  Without the env var the service
+// operates fully in-memory (demo/hackathon mode).
 func NewWarrantService() *WarrantService {
 	svc := &WarrantService{
 		warrants: make(map[string]models.Warrant),
+		dbPath:   os.Getenv("JOCKY_WARRANT_DB_PATH"),
 	}
 
+	if svc.dbPath != "" {
+		if err := svc.load(); err != nil {
+			log.Printf("[warrant] WARN: could not load %s: %v — seeding defaults", svc.dbPath, err)
+			svc.seedDefaults()
+			_ = svc.persist()
+		} else {
+			log.Printf("[warrant] Loaded %d warrant(s) from %s", len(svc.warrants), svc.dbPath)
+		}
+	} else {
+		log.Printf("[warrant] JOCKY_WARRANT_DB_PATH not set — running with in-memory demo warrants")
+		svc.seedDefaults()
+	}
+
+	return svc
+}
+
+func (s *WarrantService) seedDefaults() {
 	issued1 := time.Now().Add(-24 * time.Hour)
 	until1 := time.Now().Add(72 * time.Hour)
-	svc.warrants["NTRO-2026-CYBER-0421"] = models.Warrant{
+	s.warrants["NTRO-2026-CYBER-0421"] = models.Warrant{
 		ID:              "NTRO-2026-CYBER-0421",
 		Jurisdiction:    "IN-DL-CENTRAL",
 		AuthorizedBy1:   "OFFICER-VK-902",
@@ -49,7 +76,7 @@ func NewWarrantService() *WarrantService {
 
 	issued2 := time.Now().Add(-12 * time.Hour)
 	until2 := time.Now().Add(48 * time.Hour)
-	svc.warrants["NTRO-2026-LINUX-0089"] = models.Warrant{
+	s.warrants["NTRO-2026-LINUX-0089"] = models.Warrant{
 		ID:              "NTRO-2026-LINUX-0089",
 		Jurisdiction:    "IN-MH-WEST",
 		AuthorizedBy1:   "OFFICER-AK-105",
@@ -59,8 +86,43 @@ func NewWarrantService() *WarrantService {
 		SignatureBase64: seedWarrantSignature("NTRO-2026-LINUX-0089", "OFFICER-AK-105", "OFFICER-PK-882", issued2, until2),
 		IsActive:        true,
 	}
+}
 
-	return svc
+// load reads the warrant JSON file into s.warrants.
+func (s *WarrantService) load() error {
+	data, err := os.ReadFile(s.dbPath)
+	if err != nil {
+		return err
+	}
+	var warrants []models.Warrant
+	if err := json.Unmarshal(data, &warrants); err != nil {
+		return fmt.Errorf("parse %s: %w", s.dbPath, err)
+	}
+	for _, w := range warrants {
+		s.warrants[w.ID] = w
+	}
+	return nil
+}
+
+// persist writes the current warrant map to disk atomically.
+// Called under s.mu.Lock() by callers that already hold the write lock.
+func (s *WarrantService) persist() error {
+	if s.dbPath == "" {
+		return nil
+	}
+	list := make([]models.Warrant, 0, len(s.warrants))
+	for _, w := range s.warrants {
+		list = append(list, w)
+	}
+	data, err := json.MarshalIndent(list, "", "  ")
+	if err != nil {
+		return err
+	}
+	tmp := s.dbPath + ".tmp"
+	if err := os.WriteFile(tmp, data, 0600); err != nil {
+		return err
+	}
+	return os.Rename(tmp, s.dbPath)
 }
 
 func (s *WarrantService) ValidateWarrant(warrantID string) (*models.Warrant, error) {
@@ -110,6 +172,9 @@ func (s *WarrantService) RegisterWarrant(warrant models.Warrant) error {
 	}
 
 	s.warrants[warrant.ID] = warrant
+	if err := s.persist(); err != nil {
+		log.Printf("[warrant] WARN: could not persist warrant %s: %v", warrant.ID, err)
+	}
 	return nil
 }
 

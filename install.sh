@@ -1,65 +1,72 @@
 #!/usr/bin/env sh
-# JOCKY installer — macOS & Linux
+# JOCKY installer — downloads the latest release binary for the current platform.
 # Usage: curl -fsSL https://raw.githubusercontent.com/vmmuthu31/jocky/main/install.sh | sh
+
 set -e
 
 REPO="vmmuthu31/jocky"
-BIN_NAME="jocky-compile"
-INSTALL_DIR="${JOCKY_INSTALL_DIR:-/usr/local/bin}"
+INSTALL_DIR="/usr/local/bin"
+BINARY="jocky-compile"
 
-# Detect OS + arch
+# Detect OS and arch
 OS="$(uname -s)"
 ARCH="$(uname -m)"
 
 case "$OS" in
-  Linux)
-    case "$ARCH" in
-      x86_64)  ARTIFACT="jocky-linux-x86_64" ;;
-      aarch64) ARTIFACT="jocky-linux-arm64" ;;
-      *) echo "Unsupported architecture: $ARCH" && exit 1 ;;
-    esac
-    ;;
   Darwin)
     case "$ARCH" in
-      x86_64)  ARTIFACT="jocky-macos-x86_64" ;;
-      arm64)   ARTIFACT="jocky-macos-arm64" ;;
-      *) echo "Unsupported architecture: $ARCH" && exit 1 ;;
+      arm64)  ASSET="jocky-macos-arm64" ;;
+      x86_64) ASSET="jocky-macos-x86_64" ;;
+      *)      echo "Unsupported macOS architecture: $ARCH" && exit 1 ;;
     esac
     ;;
-  *) echo "Unsupported OS: $OS" && exit 1 ;;
+  Linux)
+    case "$ARCH" in
+      x86_64)  ASSET="jocky-linux-x86_64" ;;
+      aarch64) ASSET="jocky-linux-arm64" ;;
+      arm64)   ASSET="jocky-linux-arm64" ;;
+      *)       echo "Unsupported Linux architecture: $ARCH" && exit 1 ;;
+    esac
+    ;;
+  *)
+    echo "Unsupported OS: $OS"
+    echo "On Windows, run: irm https://raw.githubusercontent.com/vmmuthu31/jocky/main/install.ps1 | iex"
+    exit 1
+    ;;
 esac
 
-# Get latest release tag
+# Fetch the latest release tag
 LATEST=$(curl -fsSL "https://api.github.com/repos/${REPO}/releases/latest" \
-  | grep '"tag_name"' | head -1 | cut -d'"' -f4)
+  | grep '"tag_name"' | sed 's/.*"tag_name": "\(.*\)".*/\1/')
 
 if [ -z "$LATEST" ]; then
-  echo "Could not fetch latest release. Check https://github.com/${REPO}/releases"
+  echo "Could not determine latest release. Check https://github.com/${REPO}/releases"
   exit 1
 fi
 
-URL="https://github.com/${REPO}/releases/download/${LATEST}/${ARTIFACT}"
-
-echo "Installing JOCKY ${LATEST} (${ARTIFACT})..."
-echo "From: ${URL}"
-echo "To:   ${INSTALL_DIR}/${BIN_NAME}"
-
+URL="https://github.com/${REPO}/releases/download/${LATEST}/${ASSET}"
 TMP="$(mktemp)"
+
+echo "Downloading JOCKY ${LATEST} (${ASSET})..."
 curl -fsSL "$URL" -o "$TMP"
 chmod +x "$TMP"
 
-# Try to install without sudo, fall back with sudo
+# Install — try /usr/local/bin, fall back to ~/bin
 if [ -w "$INSTALL_DIR" ]; then
-  mv "$TMP" "${INSTALL_DIR}/${BIN_NAME}"
+  mv "$TMP" "${INSTALL_DIR}/${BINARY}"
+  echo "Installed to ${INSTALL_DIR}/${BINARY}"
 else
-  echo "Need sudo to write to ${INSTALL_DIR}:"
-  sudo mv "$TMP" "${INSTALL_DIR}/${BIN_NAME}"
+  mkdir -p "$HOME/.local/bin"
+  mv "$TMP" "$HOME/.local/bin/${BINARY}"
+  INSTALL_DIR="$HOME/.local/bin"
+  echo "Installed to ${INSTALL_DIR}/${BINARY}"
+  echo "Add the following to your shell profile if not already present:"
+  echo "  export PATH=\"\$HOME/.local/bin:\$PATH\""
 fi
 
 echo ""
-echo "✓ JOCKY installed → ${INSTALL_DIR}/${BIN_NAME}"
+echo "Verify with:"
+echo "  ${BINARY} --help"
 echo ""
-echo "Quick start:"
-echo "  jocky-compile --help"
-echo "  jocky-compile new triage --output my_scan.jocky"
-echo "  jocky-compile compile --input my_scan.jocky --output out.ll --target linux"
+echo "Quick start (development mode):"
+echo "  JOCKY_ALLOW_DEV_KEY=1 ${BINARY} compile --input scan.jocky --output scan.ll --target linux"
