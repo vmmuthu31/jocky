@@ -3,7 +3,7 @@
   "displayName": "JOCKY Forensic DSL",
   "description": "Syntax highlighting, snippets, and language support for JOCKY forensic scripts (.jocky)",
   "version": "0.2.0",
-  "publisher": "ntro-jocky",
+  "publisher": "Jocky",
   "icon": "icon.png",
   "repository": {
     "type": "git",
