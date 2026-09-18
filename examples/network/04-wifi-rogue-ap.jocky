@@ -1,0 +1,19 @@
+// SCENARIO: Rogue AP / Evil Twin Attack Investigation (Linux)
+// USE CASE: Investigate rogue wireless access point used for MITM credential theft
+// WARRANT: IT Act 2000 §69 — Cyber Crime Investigation
+// TARGET: Linux wireless access point controller
+
+forensic session {
+    target: "10.1.0.1";
+    warrant: "NTRO-2026-CYBER-0130";
+    collect {
+        network: active_connections,
+        network: listening_ports,
+        network: arp_table,
+        proc: all_processes,
+        auditd: execve | open | socket,
+        ext4: journal_parse
+    };
+    encrypt chacha20(key: hsm_derived);
+    transmit via: "wss://forensics-gw.ntro.gov.in/telemetry";
+}

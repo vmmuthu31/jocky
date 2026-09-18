@@ -1,0 +1,20 @@
+// SCENARIO: Linux Live Response — Active Compromise
+// USE CASE: Live memory + network + process snapshot during ongoing attack
+// WARRANT: IT Act 2000 §69 — Cyber Crime Investigation
+// TARGET: Ubuntu 20.04 API server — SOC alert triggered
+
+forensic session {
+    target: "10.0.20.33";
+    warrant: "NTRO-2026-CYBER-0201";
+    collect {
+        proc: all_processes,
+        proc: open_files,
+        proc: login_sessions,
+        auditd: execve | open | connect | socket | fork,
+        network: active_connections,
+        network: listening_ports,
+        ext4: journal_parse
+    };
+    encrypt chacha20(key: hsm_derived);
+    transmit via: "wss://ir-forensics.ntro.gov.in/telemetry";
+}

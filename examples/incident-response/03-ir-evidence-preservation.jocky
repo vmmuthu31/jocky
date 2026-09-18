@@ -1,0 +1,21 @@
+// SCENARIO: Legal Evidence Preservation — Chain of Custody
+// USE CASE: Court-admissible evidence collection per IT Act §65B
+//           Dual-officer approved, SHA-256 hash-chain logged
+// WARRANT: IT Act 2000 §69 — Cyber Crime Investigation (Court Order)
+// TARGET: Windows workstation — digital evidence for prosecution
+
+forensic session {
+    target: "192.168.2.75";
+    warrant: "NTRO-2026-LEGAL-0010";
+    collect {
+        disk: mft_parse,
+        disk: usn_journal,
+        disk: prefetch,
+        registry: HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run,
+        memory: process "chrome.exe",
+        memory: process "outlook.exe",
+        network: active_connections
+    };
+    encrypt aes256(key: hsm_derived);  // AES-256-GCM FIPS 140-2 — court admissible
+    transmit via: "wss://legal-evidence.ntro.gov.in/custody";
+}

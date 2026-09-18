@@ -1,0 +1,21 @@
+// SCENARIO: APT C2 Implant Analysis (Linux)
+// USE CASE: Long-term APT implant beaconing from Linux server — collect full TTPs
+// WARRANT: IT Act 2000 §69 — National Security
+// TARGET: Linux mail server — APT28/Turla-style persistent implant suspected
+
+forensic session {
+    target: "10.0.8.12";
+    warrant: "NTRO-2026-NATSEC-0067";
+    collect {
+        proc: all_processes,
+        proc: kernel_modules,
+        proc: open_files,
+        auditd: execve | open | connect | socket | ptrace | mmap,
+        network: active_connections,
+        network: dns_queries,
+        network: tls_sessions,
+        ext4: journal_parse
+    };
+    encrypt ml_kem(key: hsm_derived);   // PQC — nation-state adversary assumed
+    transmit via: "wss://apt-forensics.ntro.gov.in/telemetry";
+}

@@ -1,0 +1,19 @@
+// SCENARIO: Linux Rootkit Detection
+// USE CASE: Detect kernel-level rootkits hiding processes/files via /proc discrepancy
+// WARRANT: IT Act 2000 §69 — Cyber Crime Investigation
+// TARGET: RHEL 8 production server — anomalous /proc behaviour detected
+
+forensic session {
+    target: "10.0.3.77";
+    warrant: "NTRO-2026-CYBER-0055";
+    collect {
+        proc: all_processes,
+        proc: kernel_modules,
+        proc: open_files,
+        ext4: journal_parse,
+        auditd: execve | open | connect | mmap,
+        network: active_connections
+    };
+    encrypt aes256(key: hsm_derived);
+    transmit via: "wss://forensics-gw.ntro.gov.in/telemetry";
+}

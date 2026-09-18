@@ -1,0 +1,24 @@
+// SCENARIO: Domain Controller Full Forensic Sweep
+// USE CASE: Complete AD DC investigation — DCSync, Kerberoasting, Golden Ticket
+// WARRANT: IT Act 2000 §69 — National Security
+// TARGET: Primary Domain Controller
+
+forensic session {
+    target: "10.0.0.1";
+    warrant: "NTRO-2026-NATSEC-0033";
+    collect {
+        registry: HKLM\SYSTEM\CurrentControlSet\Services\NTDS,
+        registry: HKLM\SYSTEM\CurrentControlSet\Services\Kdc,
+        registry: HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon,
+        registry: HKLM\SYSTEM\CurrentControlSet\Control\Lsa,
+        memory: process "lsass.exe",
+        memory: process "ntdsa.dll",
+        memory: process "dns.exe",
+        disk: mft_parse,
+        disk: usn_journal,
+        disk: prefetch,
+        network: active_connections
+    };
+    encrypt aes256(key: hsm_derived);
+    transmit via: "wss://forensics-gw.ntro.gov.in/telemetry";
+}

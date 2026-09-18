@@ -1,0 +1,22 @@
+// SCENARIO: APT Initial Access Investigation (Windows)
+// USE CASE: Spear-phishing macro → dropper → implant — initial foothold analysis
+// WARRANT: IT Act 2000 §69 — National Security
+// TARGET: Windows 10 — phishing victim workstation
+
+forensic session {
+    target: "10.0.5.88";
+    warrant: "NTRO-2026-NATSEC-0060";
+    collect {
+        registry: HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Run,
+        registry: HKLM\SOFTWARE\Microsoft\Office\16.0\Word\Security,
+        memory: process "winword.exe",
+        memory: process "excel.exe",
+        memory: process "powershell.exe",
+        memory: process "wscript.exe",
+        disk: prefetch,
+        disk: mft_parse,
+        network: active_connections
+    };
+    encrypt aes256(key: hsm_derived);
+    transmit via: "wss://apt-forensics.ntro.gov.in/telemetry";
+}

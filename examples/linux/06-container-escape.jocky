@@ -1,0 +1,19 @@
+// SCENARIO: Container Escape Investigation
+// USE CASE: Detect Docker/K8s container breakout to host namespace
+// WARRANT: IT Act 2000 §69 — Critical Infrastructure Protection
+// TARGET: Kubernetes worker node — abnormal host namespace access
+
+forensic session {
+    target: "10.96.0.10";
+    warrant: "NTRO-2026-INFRA-0019";
+    collect {
+        proc: all_processes,
+        proc: namespaces,
+        proc: kernel_modules,
+        auditd: execve | open | mount | unshare | ptrace,
+        ext4: journal_parse,
+        network: active_connections
+    };
+    encrypt aes256(key: hsm_derived);
+    transmit via: "wss://forensics-gw.ntro.gov.in/telemetry";
+}

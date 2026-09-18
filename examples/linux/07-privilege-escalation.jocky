@@ -1,0 +1,19 @@
+// SCENARIO: Linux Privilege Escalation
+// USE CASE: Detect SUID abuse, sudo misconfig, cron job hijack for root escalation
+// WARRANT: IT Act 2000 §69 — Cyber Crime Investigation
+// TARGET: CentOS 7 database server — non-root user accessed /etc/shadow
+
+forensic session {
+    target: "10.20.1.15";
+    warrant: "NTRO-2026-CYBER-0091";
+    collect {
+        auditd: execve | open | setuid | setgid | chmod,
+        proc: all_processes,
+        proc: suid_binaries,
+        proc: cron_jobs,
+        ext4: journal_parse,
+        network: active_connections
+    };
+    encrypt chacha20(key: hsm_derived);
+    transmit via: "wss://forensics-gw.ntro.gov.in/telemetry";
+}

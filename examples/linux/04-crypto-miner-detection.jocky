@@ -1,0 +1,19 @@
+// SCENARIO: Crypto Miner / Botnet Detection
+// USE CASE: Detect illicit crypto mining or botnet C2 beacon on cloud VM
+// WARRANT: IT Act 2000 §69 — Cyber Crime Investigation
+// TARGET: Cloud VM with abnormal CPU / outbound traffic
+
+forensic session {
+    target: "10.128.0.5";
+    warrant: "NTRO-2026-CYBER-0071";
+    collect {
+        proc: all_processes,
+        proc: cpu_usage,
+        auditd: execve | connect | socket,
+        network: active_connections,
+        network: dns_queries,
+        ext4: journal_parse
+    };
+    encrypt chacha20(key: hsm_derived);
+    transmit via: "wss://forensics-gw.ntro.gov.in/telemetry";
+}

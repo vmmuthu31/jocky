@@ -1,0 +1,18 @@
+// SCENARIO: DNS Tunneling Detection (Linux)
+// USE CASE: Detect covert data exfil via DNS TXT/A record queries (dnscat2/iodine)
+// WARRANT: IT Act 2000 §69 — Cyber Crime Investigation
+// TARGET: Linux router/resolver with abnormal DNS query volume
+
+forensic session {
+    target: "10.0.0.1";
+    warrant: "NTRO-2026-CYBER-0113";
+    collect {
+        network: dns_queries,
+        network: active_connections,
+        proc: all_processes,
+        auditd: execve | connect | socket,
+        ext4: journal_parse
+    };
+    encrypt chacha20(key: hsm_derived);
+    transmit via: "wss://forensics-gw.ntro.gov.in/telemetry";
+}

@@ -1,0 +1,22 @@
+// SCENARIO: Ransomware Investigation
+// USE CASE: Full disk + memory + registry sweep after ransomware detonation
+// WARRANT: IT Act 2000 §69 — Cyber Crime Investigation
+// TARGET: Windows Server 2022 — encrypted file server
+
+forensic session {
+    target: "10.10.0.50";
+    warrant: "NTRO-2026-CYBER-0042";
+    collect {
+        disk: mft_parse,
+        disk: usn_journal,
+        disk: prefetch,
+        registry: HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options,
+        registry: HKLM\SYSTEM\CurrentControlSet\Services,
+        memory: process "vssadmin.exe",
+        memory: process "wbadmin.exe",
+        memory: process "bcdedit.exe",
+        network: active_connections
+    };
+    encrypt aes256(key: hsm_derived);
+    transmit via: "wss://forensics-gw.ntro.gov.in/telemetry";
+}

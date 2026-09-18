@@ -1,0 +1,22 @@
+// SCENARIO: Day-Zero Incident Response Triage (Windows)
+// USE CASE: First 15 minutes of IR — grab everything before attacker wipes tracks
+// WARRANT: IT Act 2000 §69 — Cyber Crime Investigation
+// TARGET: Windows Server — active intrusion in progress
+
+forensic session {
+    target: "10.0.1.50";
+    warrant: "NTRO-2026-CYBER-0200";
+    collect {
+        memory: process "lsass.exe",
+        memory: process "cmd.exe",
+        memory: process "powershell.exe",
+        registry: HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run,
+        registry: HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Run,
+        registry: HKLM\SYSTEM\CurrentControlSet\Services,
+        disk: prefetch,
+        disk: mft_parse,
+        network: active_connections
+    };
+    encrypt aes256(key: hsm_derived);
+    transmit via: "wss://ir-forensics.ntro.gov.in/telemetry";
+}

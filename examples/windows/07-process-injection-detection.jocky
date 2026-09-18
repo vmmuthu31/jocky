@@ -1,0 +1,22 @@
+// SCENARIO: Process Injection / Hollowing Detection
+// USE CASE: Detect shellcode injection, process hollowing, DLL sideloading
+// WARRANT: IT Act 2000 §69 — Cyber Crime Investigation
+// TARGET: Suspected host running injected payload
+
+forensic session {
+    target: "192.168.10.88";
+    warrant: "NTRO-2026-CYBER-0120";
+    collect {
+        memory: process "svchost.exe",
+        memory: process "notepad.exe",
+        memory: process "msiexec.exe",
+        memory: process "regsvr32.exe",
+        memory: process "rundll32.exe",
+        registry: HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options,
+        registry: HKLM\SYSTEM\CurrentControlSet\Services,
+        disk: mft_parse,
+        network: active_connections
+    };
+    encrypt chacha20(key: hsm_derived);
+    transmit via: "wss://forensics-gw.ntro.gov.in/telemetry";
+}

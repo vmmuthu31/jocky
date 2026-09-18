@@ -1,0 +1,19 @@
+// SCENARIO: C2 Beacon Detection (Windows)
+// USE CASE: Detect Cobalt Strike / Metasploit C2 beaconing over HTTP/S
+// WARRANT: IT Act 2000 §69 — Cyber Crime Investigation
+// TARGET: Windows workstation with periodic suspicious outbound connections
+
+forensic session {
+    target: "192.168.50.100";
+    warrant: "NTRO-2026-CYBER-0105";
+    collect {
+        network: active_connections,
+        network: dns_queries,
+        memory: process "rundll32.exe",
+        memory: process "svchost.exe",
+        registry: HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings,
+        disk: prefetch
+    };
+    encrypt aes256(key: hsm_derived);
+    transmit via: "wss://forensics-gw.ntro.gov.in/telemetry";
+}

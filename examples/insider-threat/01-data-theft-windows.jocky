@@ -1,0 +1,22 @@
+// SCENARIO: Insider Threat — Data Theft (Windows)
+// USE CASE: Employee copying classified documents to USB / cloud storage before resignation
+// WARRANT: IT Act 2000 §69 — Insider Threat Investigation
+// TARGET: Windows laptop — DLP alert on bulk file copy
+
+forensic session {
+    target: "10.0.2.45";
+    warrant: "NTRO-2026-INSDR-0003";
+    collect {
+        disk: mft_parse,
+        disk: usn_journal,
+        registry: HKLM\SYSTEM\CurrentControlSet\Enum\USBSTOR,
+        registry: HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs,
+        memory: process "explorer.exe",
+        memory: process "chrome.exe",
+        memory: process "onedrive.exe",
+        network: active_connections,
+        network: dns_queries
+    };
+    encrypt aes256(key: hsm_derived);
+    transmit via: "wss://forensics-gw.ntro.gov.in/telemetry";
+}

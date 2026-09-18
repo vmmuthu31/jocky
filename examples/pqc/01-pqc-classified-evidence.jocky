@@ -1,0 +1,18 @@
+// SCENARIO: Post-Quantum Encrypted Evidence Collection (Linux)
+// USE CASE: Collect classified-level evidence with NIST FIPS 203 ML-KEM-768 encryption
+// WARRANT: IT Act 2000 §69 — National Security (Top Secret)
+// TARGET: Air-gapped Linux intelligence workstation
+// NOTE: ML-KEM-768 resists quantum adversary with Grover/Shor attacks
+
+forensic session {
+    target: "192.168.100.5";
+    warrant: "NTRO-2026-NATSEC-0001";
+    collect {
+        proc: all_processes,
+        auditd: execve | open | connect,
+        network: active_connections,
+        ext4: journal_parse
+    };
+    encrypt ml_kem(key: hsm_derived);   // Post-quantum: NIST FIPS 203 ML-KEM-768
+    transmit via: "wss://pqc-forensics.ntro.gov.in/telemetry";
+}

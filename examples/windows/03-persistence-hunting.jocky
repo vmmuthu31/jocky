@@ -1,0 +1,24 @@
+// SCENARIO: Windows Persistence Mechanism Hunting
+// USE CASE: Detect all persistence points after suspected APT implant
+// WARRANT: IT Act 2000 §69 — National Security
+// TARGET: Windows 11 executive workstation
+
+forensic session {
+    target: "10.0.1.20";
+    warrant: "NTRO-2026-NATSEC-0011";
+    collect {
+        registry: HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run,
+        registry: HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Run,
+        registry: HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce,
+        registry: HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce,
+        registry: HKLM\SYSTEM\CurrentControlSet\Services,
+        registry: HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon,
+        registry: HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options,
+        registry: HKCU\SOFTWARE\Classes\CLSID,
+        disk: prefetch,
+        memory: process "lsass.exe",
+        network: active_connections
+    };
+    encrypt chacha20(key: hsm_derived);
+    transmit via: "wss://forensics-gw.ntro.gov.in/telemetry";
+}

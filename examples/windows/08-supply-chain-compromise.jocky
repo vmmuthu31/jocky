@@ -1,0 +1,22 @@
+// SCENARIO: Supply Chain Compromise Investigation
+// USE CASE: Investigate backdoored software update — SolarWinds-style attack
+// WARRANT: IT Act 2000 §69 — Critical Infrastructure Protection
+// TARGET: IT management server with compromised update agent
+
+forensic session {
+    target: "10.50.0.10";
+    warrant: "NTRO-2026-INFRA-0007";
+    collect {
+        registry: HKLM\SOFTWARE\SolarWinds,
+        registry: HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run,
+        registry: HKLM\SYSTEM\CurrentControlSet\Services,
+        memory: process "solarwinds.businesslayerhost.exe",
+        memory: process "powershell.exe",
+        memory: process "wscript.exe",
+        disk: mft_parse,
+        disk: prefetch,
+        network: active_connections
+    };
+    encrypt aes256(key: hsm_derived);
+    transmit via: "wss://forensics-gw.ntro.gov.in/telemetry";
+}

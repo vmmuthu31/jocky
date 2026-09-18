@@ -1,0 +1,19 @@
+// SCENARIO: SSH Brute Force + Successful Compromise
+// USE CASE: Post-exploitation forensics after SSH brute force login
+// WARRANT: IT Act 2000 §69 — Cyber Crime Investigation
+// TARGET: Linux bastion host — auth logs show 10,000 failed then successful login
+
+forensic session {
+    target: "10.0.0.200";
+    warrant: "NTRO-2026-CYBER-0084";
+    collect {
+        auditd: execve | open | connect | setuid | setgid,
+        proc: all_processes,
+        proc: login_sessions,
+        ext4: journal_parse,
+        network: active_connections,
+        network: listening_ports
+    };
+    encrypt aes256(key: hsm_derived);
+    transmit via: "wss://forensics-gw.ntro.gov.in/telemetry";
+}

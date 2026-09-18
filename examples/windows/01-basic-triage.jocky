@@ -1,0 +1,16 @@
+// SCENARIO: Windows Basic Triage
+// USE CASE: First-responder quick scan on a suspected compromised Windows host
+// WARRANT: IT Act 2000 §69 — Cyber Crime Investigation
+// TARGET: Windows workstation
+
+forensic session {
+    target: "192.168.1.105";
+    warrant: "NTRO-2026-CYBER-0001";
+    collect {
+        registry: HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run,
+        memory: process "explorer.exe",
+        network: active_connections
+    };
+    encrypt aes256(key: hsm_derived);
+    transmit via: "wss://forensics-gw.ntro.gov.in/telemetry";
+}

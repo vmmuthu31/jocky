@@ -1,0 +1,19 @@
+// SCENARIO: Web Server Compromise
+// USE CASE: Investigate webshell upload, RCE exploitation of Apache/Nginx
+// WARRANT: IT Act 2000 §69 — Cyber Crime Investigation
+// TARGET: Debian 12 public-facing web server
+
+forensic session {
+    target: "203.0.113.45";
+    warrant: "NTRO-2026-CYBER-0063";
+    collect {
+        proc: all_processes,
+        proc: open_files,
+        auditd: execve | open | write | connect,
+        ext4: journal_parse,
+        network: active_connections,
+        network: listening_ports
+    };
+    encrypt aes256(key: hsm_derived);
+    transmit via: "wss://forensics-gw.ntro.gov.in/telemetry";
+}

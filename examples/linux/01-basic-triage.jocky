@@ -1,0 +1,16 @@
+// SCENARIO: Linux Basic Triage
+// USE CASE: First-responder scan on a suspected compromised Linux server
+// WARRANT: IT Act 2000 §69 — Cyber Crime Investigation
+// TARGET: Ubuntu 22.04 web server
+
+forensic session {
+    target: "10.0.5.42";
+    warrant: "NTRO-2026-CYBER-0002";
+    collect {
+        proc: all_processes,
+        network: active_connections,
+        auditd: execve | open
+    };
+    encrypt chacha20(key: hsm_derived);
+    transmit via: "wss://forensics-gw.ntro.gov.in/telemetry";
+}

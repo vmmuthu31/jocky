@@ -1,0 +1,31 @@
+// SCENARIO: APT Full Kill Chain Documentation (Windows)
+// USE CASE: Reconstruct complete MITRE ATT&CK kill chain for court + intelligence report
+//           Covers: Recon → Initial Access → Execution → Persistence →
+//                   Priv Esc → Defense Evasion → Credential Access →
+//                   Lateral Movement → Collection → Exfiltration
+// WARRANT: IT Act 2000 §69 — National Security (Top Secret)
+// TARGET: Windows enterprise host — full forensic sweep for kill chain reconstruction
+
+forensic session {
+    target: "10.50.1.100";
+    warrant: "NTRO-2026-NATSEC-0099";
+    collect {
+        registry: HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run,
+        registry: HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Run,
+        registry: HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce,
+        registry: HKLM\SYSTEM\CurrentControlSet\Services,
+        registry: HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon,
+        registry: HKLM\SYSTEM\CurrentControlSet\Control\Lsa,
+        memory: process "lsass.exe",
+        memory: process "svchost.exe",
+        memory: process "powershell.exe",
+        memory: process "cmd.exe",
+        disk: mft_parse,
+        disk: usn_journal,
+        disk: prefetch,
+        network: active_connections,
+        network: dns_queries
+    };
+    encrypt ml_kem(key: hsm_derived);
+    transmit via: "wss://apt-forensics.ntro.gov.in/telemetry";
+}

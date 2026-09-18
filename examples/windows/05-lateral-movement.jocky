@@ -1,0 +1,22 @@
+// SCENARIO: Lateral Movement Detection
+// USE CASE: Detect pass-the-hash / WMI / PSExec lateral movement across subnet
+// WARRANT: IT Act 2000 §69 — Cyber Crime Investigation
+// TARGET: Windows jump server used as pivot point
+
+forensic session {
+    target: "10.10.5.15";
+    warrant: "NTRO-2026-CYBER-0099";
+    collect {
+        registry: HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run,
+        registry: HKLM\SYSTEM\CurrentControlSet\Services\LanmanServer\Shares,
+        memory: process "wmiprvse.exe",
+        memory: process "psexesvc.exe",
+        memory: process "cmd.exe",
+        memory: process "powershell.exe",
+        disk: prefetch,
+        disk: usn_journal,
+        network: active_connections
+    };
+    encrypt aes256(key: hsm_derived);
+    transmit via: "wss://forensics-gw.ntro.gov.in/telemetry";
+}

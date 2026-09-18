@@ -1,0 +1,19 @@
+// SCENARIO: Domain Fronting C2 Investigation (Linux)
+// USE CASE: Detect CDN domain-fronting used to hide C2 traffic behind legitimate CDN
+// WARRANT: IT Act 2000 §69 — National Security
+// TARGET: Linux proxy server routing traffic through CDN provider
+
+forensic session {
+    target: "10.0.10.55";
+    warrant: "NTRO-2026-NATSEC-0022";
+    collect {
+        network: active_connections,
+        network: dns_queries,
+        network: tls_sessions,
+        proc: all_processes,
+        auditd: execve | connect | socket | sendto,
+        ext4: journal_parse
+    };
+    encrypt aes256(key: hsm_derived);
+    transmit via: "wss://forensics-gw.ntro.gov.in/telemetry";
+}

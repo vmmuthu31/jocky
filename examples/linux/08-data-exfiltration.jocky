@@ -1,0 +1,20 @@
+// SCENARIO: Data Exfiltration Detection
+// USE CASE: Large outbound transfer detected — investigate exfil of classified data
+// WARRANT: IT Act 2000 §69 — National Security
+// TARGET: Linux file server with anomalous outbound bandwidth
+
+forensic session {
+    target: "10.5.0.30";
+    warrant: "NTRO-2026-NATSEC-0044";
+    collect {
+        proc: all_processes,
+        proc: open_files,
+        auditd: execve | open | read | connect | sendto,
+        network: active_connections,
+        network: dns_queries,
+        network: bandwidth_stats,
+        ext4: journal_parse
+    };
+    encrypt aes256(key: hsm_derived);
+    transmit via: "wss://forensics-gw.ntro.gov.in/telemetry";
+}

@@ -1,0 +1,19 @@
+// SCENARIO: Insider Sabotage Investigation (Linux)
+// USE CASE: Disgruntled sysadmin deleted production DB + deployed logic bomb before exit
+// WARRANT: IT Act 2000 §69 — Insider Threat Investigation
+// TARGET: Linux production database server
+
+forensic session {
+    target: "10.0.30.5";
+    warrant: "NTRO-2026-INSDR-0008";
+    collect {
+        auditd: execve | open | unlink | rmdir | truncate,
+        proc: all_processes,
+        proc: login_sessions,
+        proc: cron_jobs,
+        ext4: journal_parse,
+        network: active_connections
+    };
+    encrypt aes256(key: hsm_derived);
+    transmit via: "wss://forensics-gw.ntro.gov.in/telemetry";
+}
