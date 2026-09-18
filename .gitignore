@@ -1,0 +1,14 @@
+# Node / VSCode extension
+vscode-extension/node_modules/
+vscode-extension/out/
+*.vsix
+
+# Rust build artifacts
+compiler/target/
+
+# Go build artifacts
+server/jocky_audit_ledger.json.tmp
+
+# OS
+.DS_Store
+Thumbs.db
